@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+  <title>Google (Responsive, Language-Based Theme)</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #1f1f1f;
+      --muted-text: #5f6368;
+      --link: #1a73e8;
+      --surface: #f6f7f8;
+      --footer-bg: #eef1f1;
+      --shadow: 0 1px 6px rgba(0,0,0,.12);
+      --input-bg: #fff;
+      --input-border: #dadce0;
+      --icon: #9aa0a6;
+      --button-bg: #eef1f1;
+      --button-text: #272626;
+      --signin-bg: #0f63c1;
+      --signin-text: #fff;
+      --radius-xl: 999px;
+      --radius-md: 10px;
+      --space-1: 8px;
+      --space-2: 12px;
+      --space-3: 16px;
+      --space-4: 20px;
+      --max-content: min(680px, 96vw);
+    }
+
+    html[data-theme="dark"] {
+      --bg: #0f1115;
+      --text: #e3e3e3;
+      --muted-text: #b9bcbf;
+      --link: #8ab4f8;
+      --surface: #161a20;
+      --footer-bg: #14171c;
+      --shadow: 0 1px 10px rgba(0,0,0,.5);
+      --input-bg: #0f131a;
+      --input-border: #2a2f36;
+      --icon: #a8adb3;
+      --button-bg: #1f2530;
+      --button-text: #e6e6e6;
+      --signin-bg: #1a73e8;
+      --signin-text: #fff;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      html[data-theme="auto"] {
+        --bg: #0f1115;
+        --text: #e3e3e3;
+        --muted-text: #b9bcbf;
+        --link: #8ab4f8;
+        --surface: #161a20;
+        --footer-bg: #14171c;
+        --shadow: 0 1px 10px rgba(0,0,0,.5);
+        --input-bg: #0f131a;
+        --input-border: #2a2f36;
+        --icon: #a8adb3;
+        --button-bg: #1f2530;
+        --button-text: #e6e6e6;
+        --signin-bg: #1a73e8;
+        --signin-text: #fff;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      display: flex; flex-direction: column;
+      background: var(--bg); color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+    a { color: var(--link); text-decoration: none; }
+
+    .container { display: flex; flex-direction: column; min-height: 100%; }
+
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: var(--space-2); padding: var(--space-2) var(--space-3);
+    }
+    .header .left, .header .right { display: flex; align-items: center; gap: var(--space-2); }
+    .header a { color: var(--text); font-size: 14px; opacity: .9; }
+
+    /* 9-dot apps icon using pure CSS */
+    .google-app {
+      display: grid;
+      grid-template-columns: repeat(3, 6px);
+      grid-template-rows: repeat(3, 6px);
+      gap: 3px;
+      width: 24px; height: 24px;
+    }
+    .google-app div {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background-color: var(--icon);
+    }
+
+    .sign-in {
+      background: var(--signin-bg); color: var(--signin-text);
+      border: 0; border-radius: var(--radius-xl);
+      padding: 10px 14px; font-size: 16px; line-height: 1; cursor: pointer;
+      min-height: 44px;
+    }
+    .sign-in a { color: var(--signin-text); }
+
+    .content { display: grid; place-items: center; padding: clamp(12px, 4vw, 32px); gap: var(--space-3); }
+
+    .google-img-logo { margin-block: clamp(6px, 3vw, 10px); }
+    .google-img-logo img { width: clamp(180px, 55vw, 272px); height: auto; }
+
+    .search-box { position: relative; width: 100%; max-width: var(--max-content); }
+
+    .material-symbols-outlined {
+      color: var(--icon); position: absolute; top: 50%; transform: translateY(-50%);
+      font-size: 22px;
+    }
+    .material-symbols-outlined.search { left: 14px; }
+    .material-symbols-outlined.mic { right: 14px; }
+
+    #search-input {
+      width: 100%; height: 52px; border-radius: var(--radius-xl);
+      border: 1px solid var(--input-border);
+      outline: none; padding: 0 46px; background: var(--input-bg); color: var(--text);
+      box-shadow: var(--shadow);
+      font-size: 16px;
+    }
+
+    .search-button { margin: 14px 0; display: flex; gap: var(--space-2); justify-content: center; flex-wrap: wrap; }
+    .btn-search, .btn-feeling-lucky {
+      background: var(--button-bg); color: var(--button-text); border: 1px solid var(--input-border);
+      border-radius: var(--radius-md); min-width: 44vw; max-width: 320px; height: 48px; cursor: pointer;
+      padding: 0 var(--space-3); font-size: 16px; line-height: 1; min-height: 44px;
+    }
+
+    .footer { margin-top: auto; background: var(--footer-bg); color: var(--text); }
+    .footer-content {
+      display: flex; justify-content: center; gap: clamp(10px, 4vw, 24px);
+      padding: var(--space-2) var(--space-3); flex-wrap: wrap;
+    }
+    .footer a { color: var(--text); opacity: .9; }
+
+    @media (min-width: 560px) {
+      .btn-search, .btn-feeling-lucky { min-width: 160px; width: 180px; }
+    }
+  </style>
+
+  <script>
+    (function() {
+      const root = document.documentElement;
+      const langAttr = (root.getAttribute('lang') || '').toLowerCase();
+      const langs = [langAttr, ...(navigator.languages || []), navigator.language || '']
+        .filter(Boolean)
+        .map(l => l.toLowerCase());
+
+      const languageThemeMap = {
+        'si': 'dark',
+        'ta': 'dark'
+      };
+
+      function matchTheme(lcodes) {
+        for (const code of lcodes) {
+          const base = code.split('-')[0];
+          if (languageThemeMap[code]) return languageThemeMap[code];
+          if (languageThemeMap[base]) return languageThemeMap[base];
+        }
+        return 'auto';
+      }
+
+      const chosen = matchTheme(langs);
+      root.setAttribute('data-theme', chosen);
+    })();
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="left">
+        <div class="google-app">
+          <div></div><div></div><div></div>
+          <div></div><div></div><div></div>
+          <div></div><div></div><div></div>
+        </div>
+      </div>
+      <div class="right">
+        <div class="gmail"><p><a href="https://mail.google.com/mail/&ogbl">Gmail</a></p></div>
+        <div class="images"><p><a href="https://www.google.com/imghp?hl=en&ogbl">Images</a></p></div>
+        <div class="sign-in-button">
+          <button class="sign-in"><a href="https://accounts.google.com/ServiceLogin?hl=en&passive=true&continue=https://www.google.com/&ec=GAZAmgQ">Sign in</a></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="google-img-logo">
+        <img loading="eager" fetchpriority="high"
+             src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png"
+             alt="Google" />
+      </div>
+
+      <div class="search-box">
+        <form onsubmit="event.preventDefault()" role="search" aria-label="Google clone search">
+          <span class="material-symbols-outlined search" aria-hidden="true">search</span>
+          <span class="material-symbols-outlined mic" aria-hidden="true">mic</span>
+          <input type="search" id="search-input" inputmode="search" autocomplete="off" placeholder="Search" aria-label="Search" />
+        </form>
+      </div>
+
+      <div class="search-button">
+        <button class="btn-search" type="button">Google Search</button>
+        <button class="btn-feeling-lucky" type="button">I'm Feeling Lucky</button>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-content">
+        <p><a href="#">About</a></p>
+        <p><a href="#">Privacy</a></p>
+        <p><a href="#">Terms</a></p>
+        <p><a href="#">Settings</a></p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
