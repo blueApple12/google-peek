@@ -8,7 +8,6 @@
   <meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)">
   <title>Google</title>
 
-  <!-- Material Symbols -->
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
 
@@ -17,7 +16,7 @@
       --bg:#fff; --text:#1f1f1f; --muted:#5f6368; --link:#1a73e8;
       --surface:#f8f9fa; --foot:#f2f2f2; --border:#dadce0; --icon:#9aa0a6;
       --focus: rgba(26,115,232,.28);
-      --r-pill:999px; --r-8:8px;
+      --r-pill:999px;
       --s-2:8px; --s-3:12px; --s-4:16px;
       --w:clamp(280px,92vw,600px);
       --shadow: 0 1px 2px rgba(0,0,0,.06), 0 1px 3px rgba(60,64,67,.15);
@@ -46,30 +45,30 @@
       -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
 
+    /* HEADER */
     header {
       display:flex; justify-content:space-between; align-items:center;
       padding:var(--s-3) var(--s-4);
     }
-    .top-links {
-      display:flex; align-items:center; justify-content:space-between;
-      width:100%;
-      max-width:var(--w);
-      margin:0 auto;
+    .header-left, .header-right {
+      display:flex; align-items:center;
     }
-    .top-links a {
+    .header-left a {
       color:var(--text); font-size:14px; text-decoration:none; opacity:.9;
+      margin-right:14px;
     }
-    .top-links a:hover { text-decoration:underline; }
+    .header-left a:last-child { margin-right:0; }
+    .header-left a:hover { text-decoration:underline; }
+
     .sign-in {
       background:#1a73e8; color:#fff;
       padding:8px 14px;
       border-radius:var(--r-pill);
-      font-weight:500;
-      text-decoration:none;
-      min-height:36px;
-      line-height:20px;
+      font-weight:500; text-decoration:none;
+      min-height:36px; line-height:20px;
     }
 
+    /* MAIN */
     main {
       display:grid; place-items:start center;
       padding:clamp(12px,6vw,28px) var(--s-4);
@@ -103,6 +102,7 @@
 
     .actions { display:none; }
 
+    /* FOOTER */
     footer {
       margin-top:auto; background:var(--foot);
       border-top:1px solid var(--border);
@@ -111,17 +111,20 @@
       display:flex; flex-wrap:wrap; justify-content:center;
       gap:18px; padding:12px 16px;
     }
-    footer a { color:var(--text); opacity:.9; font-size:14px; text-decoration:none; }
-
+    footer a {
+      color:var(--text); opacity:.9; font-size:14px; text-decoration:none;
+    }
   </style>
 </head>
 <body>
   <header>
-    <nav class="top-links" aria-label="Top links">
+    <div class="header-left">
       <a href="https://www.google.com/imghp?hl=en&ogbl">Images</a>
       <a href="https://mail.google.com/mail/&ogbl">Gmail</a>
+    </div>
+    <div class="header-right">
       <a class="sign-in" href="https://accounts.google.com/ServiceLogin?hl=en&passive=true&continue=https://www.google.com/&ec=GAZAmgQ">Sign in</a>
-    </nav>
+    </div>
   </header>
 
   <main>
@@ -163,17 +166,6 @@
         var code=langs[i], base=code.split('-')[0];
         if(map[code]){html.setAttribute('data-theme',map[code]);return}
         if(map[base]){html.setAttribute('data-theme',map[base]);return}
-      }
-    })();
-
-    (function(){
-      var input=document.getElementById('q');
-      var lucky=document.getElementById('lucky');
-      if(lucky && input){
-        lucky.addEventListener('click',function(){
-          var q=encodeURIComponent(input.value||'');
-          location.href='https://www.google.com/search?btnI=I&q='+q;
-        });
       }
     })();
   </script>
