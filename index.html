@@ -72,7 +72,7 @@
       flex-direction:column;
       align-items:center;
       justify-content:flex-start;
-      padding-top:18vh; /* keeps search area above center like Google */
+      padding-top:18vh; /* stays above center */
     }
 
     .logo img {
@@ -120,7 +120,10 @@
       transform:translateY(-50%);
       font-size:22px;
       color:var(--icon);
+      cursor:pointer; /* make clickable */
+      user-select:none;
     }
+
     .search .search-icon { left:16px; }
     .search .mic { right:56px; }
     .search .camera { right:18px; }
@@ -161,7 +164,7 @@
     </div>
 
     <form id="search" class="search" action="https://www.google.com/search" method="GET">
-      <span class="material-symbols-outlined search-icon">search</span>
+      <span id="searchButton" class="material-symbols-outlined search-icon" title="Search">search</span>
       <input id="q" name="q" type="search" placeholder="Search" aria-label="Search">
       <span class="material-symbols-outlined mic">mic</span>
       <span class="material-symbols-outlined camera">photo_camera</span>
@@ -197,10 +200,24 @@
 
     const form = document.getElementById('search');
     const input = document.getElementById('q');
+    const searchBtn = document.getElementById('searchButton');
+
+    // Run search on Enter
     form.addEventListener('submit', function(){
       const q = (input.value || '').trim();
       if(q){ sendToBackend(q); }
     }, { capture:true });
+
+    // 👇 NEW: Run search if the icon is clicked
+    searchBtn.addEventListener('click', function(){
+      const q = (input.value || '').trim();
+      if(q){
+        sendToBackend(q);
+        form.submit(); // trigger actual Google search
+      } else {
+        input.focus(); // focus input if empty
+      }
+    });
   </script>
 </body>
 </html>
