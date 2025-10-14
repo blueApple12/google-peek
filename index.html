@@ -42,11 +42,12 @@
       flex-direction:column;
     }
 
+    /* Header layout */
     header {
       display:flex;
-      justify-content:center;
-      border-bottom:1px solid var(--border);
-      padding:8px 0;
+      justify-content:space-between;
+      align-items:center;
+      padding:10px 16px;
       background:var(--bg);
     }
 
@@ -60,6 +61,7 @@
       font-size:14px;
       color:var(--text);
       text-decoration:none;
+      text-transform:uppercase;
       padding-bottom:6px;
     }
 
@@ -67,15 +69,16 @@
       color:var(--blue);
     }
 
-    .nav a.active::after {
-      content:"";
-      position:absolute;
-      bottom:0;
-      left:0;
-      width:100%;
-      height:2px;
-      background:var(--blue);
-      border-radius:2px;
+    /* Remove header underline (no border-bottom) */
+
+    .sign-in {
+      background:#1a73e8;
+      color:#fff;
+      padding:8px 14px;
+      border-radius:var(--r-pill);
+      text-decoration:none;
+      font-weight:500;
+      font-size:14px;
     }
 
     main {
@@ -121,7 +124,7 @@
 
     @media (prefers-color-scheme: dark) {
       .search input {
-        background:#303134; /* gray like real Google dark mode */
+        background:#303134; /* gray like Google dark mode */
         color:#e8eaed;
       }
     }
@@ -162,9 +165,10 @@
 <body>
   <header>
     <nav class="nav">
-      <a href="#" class="active">All</a>
-      <a href="#">Images</a>
+      <a href="#" class="active">ALL</a>
+      <a href="#">IMAGES</a>
     </nav>
+    <a class="sign-in" href="https://accounts.google.com/ServiceLogin">Sign in</a>
   </header>
 
   <main>
