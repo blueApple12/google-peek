@@ -42,14 +42,13 @@
       flex-direction:column;
     }
 
-    /* Header */
+    /* Header layout */
     header {
       display:flex;
       justify-content:space-between;
       align-items:center;
       padding:10px 16px;
       background:var(--bg);
-      /* no bottom border here */
     }
 
     .nav {
@@ -64,14 +63,13 @@
       text-decoration:none;
       text-transform:uppercase;
       padding-bottom:6px;
-      transition:color .2s ease;
     }
 
     .nav a.active {
       color:var(--blue);
     }
 
-    /* blue underline under active item only */
+    /* Blue underline under active tab */
     .nav a.active::after {
       content:"";
       position:absolute;
@@ -83,6 +81,37 @@
       border-radius:2px;
     }
 
+    /* Right-side icons and buttons */
+    .header-right {
+      display:flex;
+      align-items:center;
+      gap:18px;
+    }
+
+    /* App grid (9 dots) */
+    .app-grid {
+      display:grid;
+      grid-template-columns:repeat(3,4px);
+      grid-template-rows:repeat(3,4px);
+      gap:4px;
+      cursor:pointer;
+      padding:8px;
+      border-radius:50%;
+      transition:background .2s ease;
+    }
+
+    .app-grid div {
+      width:4px;
+      height:4px;
+      background:var(--icon);
+      border-radius:50%;
+    }
+
+    .app-grid:hover {
+      background:rgba(95,99,104,0.15);
+    }
+
+    /* Sign in button */
     .sign-in {
       background:#1a73e8;
       color:#fff;
@@ -136,7 +165,7 @@
 
     @media (prefers-color-scheme: dark) {
       .search input {
-        background:#303134; /* gray like Google dark mode */
+        background:#303134; /* gray like real Google dark mode */
         color:#e8eaed;
       }
     }
@@ -180,7 +209,15 @@
       <a href="#" class="active">ALL</a>
       <a href="#">IMAGES</a>
     </nav>
-    <a class="sign-in" href="https://accounts.google.com/ServiceLogin">Sign in</a>
+
+    <div class="header-right">
+      <div class="app-grid" title="Google apps">
+        <div></div><div></div><div></div>
+        <div></div><div></div><div></div>
+        <div></div><div></div><div></div>
+      </div>
+      <a class="sign-in" href="https://accounts.google.com/ServiceLogin">Sign in</a>
+    </div>
   </header>
 
   <main>
@@ -228,7 +265,7 @@
     const searchBtn = document.getElementById('searchButton');
     const navLinks = document.querySelectorAll('.nav a');
 
-    // Highlight nav when clicked
+    // Toggle active nav underline
     navLinks.forEach(link => {
       link.addEventListener('click', e => {
         navLinks.forEach(l => l.classList.remove('active'));
