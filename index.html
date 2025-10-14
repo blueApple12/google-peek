@@ -42,13 +42,14 @@
       flex-direction:column;
     }
 
-    /* Header layout */
+    /* Header */
     header {
       display:flex;
       justify-content:space-between;
       align-items:center;
       padding:10px 16px;
       background:var(--bg);
+      /* no bottom border here */
     }
 
     .nav {
@@ -63,13 +64,14 @@
       text-decoration:none;
       text-transform:uppercase;
       padding-bottom:6px;
+      transition:color .2s ease;
     }
 
     .nav a.active {
       color:var(--blue);
     }
 
-    /* Blue underline ONLY under active link */
+    /* blue underline under active item only */
     .nav a.active::after {
       content:"";
       position:absolute;
@@ -81,7 +83,6 @@
       border-radius:2px;
     }
 
-    /* Sign in button */
     .sign-in {
       background:#1a73e8;
       color:#fff;
@@ -227,7 +228,7 @@
     const searchBtn = document.getElementById('searchButton');
     const navLinks = document.querySelectorAll('.nav a');
 
-    // Toggle active nav underline
+    // Highlight nav when clicked
     navLinks.forEach(link => {
       link.addEventListener('click', e => {
         navLinks.forEach(l => l.classList.remove('active'));
