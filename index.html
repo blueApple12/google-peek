@@ -69,8 +69,19 @@
       color:var(--blue);
     }
 
-    /* Remove header underline (no border-bottom) */
+    /* Blue underline ONLY under active link */
+    .nav a.active::after {
+      content:"";
+      position:absolute;
+      bottom:0;
+      left:0;
+      width:100%;
+      height:2px;
+      background:var(--blue);
+      border-radius:2px;
+    }
 
+    /* Sign in button */
     .sign-in {
       background:#1a73e8;
       color:#fff;
@@ -216,7 +227,7 @@
     const searchBtn = document.getElementById('searchButton');
     const navLinks = document.querySelectorAll('.nav a');
 
-    // Highlight nav when clicked
+    // Toggle active nav underline
     navLinks.forEach(link => {
       link.addEventListener('click', e => {
         navLinks.forEach(l => l.classList.remove('active'));
