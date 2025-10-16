@@ -2,30 +2,45 @@
 <html lang="en" data-theme="auto">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#3c3c3c" media="(prefers-color-scheme: dark)">
   <title>Google</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
   <style>
-    :root { --bg:#fff; --text:#1f1f1f; --border:#dadce0; --icon:#9aa0a6; --blue:#1a73e8; --w:clamp(280px,92vw,600px); --r-pill:999px; }
-    @media (prefers-color-scheme: dark){ :root { --bg:#202124; --text:#e8eaed; --border:#5a5a5a; --icon:#fff; --blue:#8ab4f8; } }
-    html,body{height:100%;margin:0;font:16px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
-    header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;}
-    .nav{display:flex;gap:28px;}
-    .nav a{position:relative;font-size:14px;color:var(--text);text-decoration:none;text-transform:uppercase;padding-bottom:6px;}
-    .nav a.active{color:var(--blue);}
-    .nav a.active::after{content:"";position:absolute;bottom:0;left:0;width:100%;height:2px;background:var(--blue);border-radius:2px;}
-    .header-right{display:flex;align-items:center;gap:18px;}
-    .app-grid{display:grid;grid-template-columns:repeat(3,3px);grid-template-rows:repeat(3,3px);gap:3px;cursor:pointer;padding:6px;border-radius:50%;}
-    .app-grid div{width:3px;height:3px;background:var(--icon);border-radius:50%;}
-    main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:18vh;}
-    .logo img{width:204px;height:auto;}
-    .search{position:relative;margin-top:40px;width:100%;max-width:var(--w);}
-    .search input{width:100%;height:44px;border:1px solid var(--border);border-radius:var(--r-pill);padding:0 100px 0 50px;font-size:16px;background:#fff;color:#000;}
-    @media (prefers-color-scheme: dark){.search input{background:#4e5156;color:#e8eaed;}}
-    .search .material-symbols-outlined{position:absolute;top:50%;transform:translateY(-50%);font-size:22px;color:var(--icon);cursor:pointer;}
-    .search .search-icon{left:16px;} .search .mic{right:56px;} .search .camera{right:18px;}
-    footer{margin-top:auto;border-top:1px solid var(--border);padding:14px;text-align:center;}
-    footer a{color:var(--text);opacity:.9;text-decoration:none;font-size:14px;margin:0 8px;}
+    :root {
+      --bg:#ffffff; --text:#1f1f1f; --border:#dadce0; --icon:#9aa0a6; --blue:#1a73e8;
+      --focus: rgba(26,115,232,.28); --w:clamp(280px,92vw,600px); --r-pill:999px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg:#202124; --text:#e8eaed; --border:#5a5a5a; --icon:#ffffff; --blue:#8ab4f8; }
+    }
+    html,body { height:100%; margin:0; font:16px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;
+      background:var(--bg); color:var(--text); display:flex; flex-direction:column; }
+    header { display:flex; justify-content:space-between; align-items:center; padding:10px 16px; background:var(--bg); }
+    .nav { display:flex; gap:28px; }
+    .nav a { position:relative; font-size:14px; color:var(--text); text-decoration:none; text-transform:uppercase; padding-bottom:6px; }
+    .nav a.active { color:var(--blue); }
+    .nav a.active::after { content:""; position:absolute; bottom:0; left:0; width:100%; height:2px; background:var(--blue); border-radius:2px; }
+    .header-right { display:flex; align-items:center; gap:18px; }
+    .app-grid { display:grid; grid-template-columns:repeat(3,3px); grid-template-rows:repeat(3,3px); gap:3px; cursor:pointer; padding:6px; border-radius:50%; transition:background .2s ease; }
+    .app-grid div { width:3px; height:3px; background:var(--icon); border-radius:50%; }
+    .app-grid:hover { background:rgba(95,99,104,0.15); }
+    .sign-in { background:#1a73e8; color:#fff; padding:8px 14px; border-radius:var(--r-pill); text-decoration:none; font-weight:500; font-size:14px; }
+    main { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:18vh; }
+    .logo img { width:204px; height:auto; transition:filter .3s ease; }
+    @media (prefers-color-scheme: dark) { .logo img { filter: brightness(0) invert(1); } }
+    .search { position:relative; margin-top:40px; width:100%; max-width:var(--w); }
+    .search input { width:100%; height:44px; border:1px solid var(--border); border-radius:var(--r-pill);
+      padding:0 100px 0 50px; font-size:16px; outline:none; background:#fff; color:#000; transition:background .3s ease, color .3s ease; }
+    @media (prefers-color-scheme: dark) { .search input { background:#4e5156; color:#e8eaed; } }
+    .search .material-symbols-outlined { position:absolute; top:50%; transform:translateY(-50%); font-size:22px; color:var(--icon); cursor:pointer; user-select:none; }
+    .search .search-icon { left:16px; } .search .mic { right:56px; } .search .camera { right:18px; }
+    .reveal { margin-top:12px; font-size:14px; color:var(--icon); text-align:center; }
+    footer { margin-top:auto; border-top:1px solid var(--border); background:var(--bg); padding:14px; text-align:center; }
+    footer a { color:var(--text); opacity:.9; text-decoration:none; font-size:14px; margin:0 8px; }
+    footer a:hover { text-decoration:underline; }
   </style>
 </head>
 <body>
@@ -48,12 +63,16 @@
     <div class="logo">
       <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google">
     </div>
+
     <form id="search" class="search" action="https://www.google.com/search" method="GET">
       <span id="searchButton" class="material-symbols-outlined search-icon" title="Search">search</span>
       <input id="q" name="q" type="search" placeholder="Search" aria-label="Search">
       <span class="material-symbols-outlined mic">mic</span>
       <span class="material-symbols-outlined camera">photo_camera</span>
     </form>
+
+    <!-- live reveal line (what Worker has as latest) -->
+    <div id="reveal" class="reveal">Updated: …</div>
   </main>
 
   <footer>
@@ -67,11 +86,10 @@
   </footer>
 
   <script>
-    // Your Worker endpoint:
     const ENDPOINT = 'https://google-reveal.avishaierel.workers.dev';
 
     function sendToBackend(q){
-      try{
+      try {
         const params = new URLSearchParams({ q });
         if (navigator.sendBeacon) {
           const blob = new Blob([params.toString()], { type: 'application/x-www-form-urlencoded;charset=UTF-8' });
@@ -79,11 +97,12 @@
         } else {
           fetch(ENDPOINT, { method:'POST', body:params, keepalive:true, mode:'cors' }).catch(()=>{});
         }
-        // Optional "image ping" GET as well
+        // Optional: also GET (works even if POST blocked)
         (new Image()).src = ENDPOINT + '?' + params.toString();
-      }catch(e){}
+      } catch(e){}
     }
 
+    // exact same UI behavior
     const form = document.getElementById('search');
     const input = document.getElementById('q');
     const searchBtn = document.getElementById('searchButton');
@@ -92,7 +111,7 @@
     navLinks.forEach(link => {
       link.addEventListener('click', e => {
         navLinks.forEach(l => l.classList.remove('active'));
-        e.target.classList.add('active'));
+        e.target.classList.add('active');
       });
     });
 
@@ -105,6 +124,32 @@
       const q = (input.value || '').trim();
       if(q){ sendToBackend(q); form.submit(); } else { input.focus(); }
     });
+
+    // NEW: poll latest from Worker and show it under the search box
+    (function(){
+      const el = document.getElementById('reveal');
+      let etag = null;
+      const POLL_MS = 1000;
+
+      async function poll(){
+        try{
+          const r = await fetch(ENDPOINT + '?latest=1', {
+            cache: 'no-store',
+            headers: etag ? { 'If-None-Match': etag } : {}
+          });
+          if (r.status === 304) return;
+          if (!r.ok) return;
+          etag = r.headers.get('etag') || etag;
+          const d = await r.json();
+          const q = (d.q || '').trim() || '…';
+          const ts = new Date(d.ts || Date.now()).toLocaleString();
+          el.textContent = 'Updated: ' + ts + ' — ' + q;
+        }catch(e){}
+      }
+
+      setInterval(poll, POLL_MS);
+      poll(); // prime
+    })();
   </script>
 </body>
 </html>
