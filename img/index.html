@@ -1,255 +1,212 @@
-// ===== Durable Object with "previous only" history =====
-export class LastDO {
-  constructor(state, env) {
-    this.state = state;
-    this.env = env;
-    this.data = { q: "", ts: 0 }; // latest
-    this.history = [];            // previous items, newest first
-    this.state.blockConcurrencyWhile(async () => {
-      this.data = (await this.state.storage.get("last")) || { q: "", ts: 0 };
-      this.history = (await this.state.storage.get("history")) || [];
-    });
-  }
-
-  async fetch(request) {
-    const url = new URL(request.url);
-
-    // Save: POST body OR GET /api/save?q=...
-    if (url.pathname === "/api/save") {
-      let q = "";
-      const ct = request.headers.get("content-type") || "";
-      if (ct.includes("application/x-www-form-urlencoded")) {
-        const body = await request.text();
-        const params = new URLSearchParams(body);
-        q = (params.get("q") || "").toString();
-      } else if (ct.includes("application/json")) {
-        const data = await request.json().catch(() => ({}));
-        q = (data.q || "").toString();
-      } else {
-        q = (url.searchParams.get("q") || "").toString();
-      }
-
-      const cleaned = (q || "").trim();
-      if (!cleaned) return new Response("IGNORED", { headers: { "Cache-Control": "no-store" } });
-
-      const now = Date.now();
-      const prev = this.data || { q: "", ts: 0 };
-
-      // push *previous* value into history so current isn't duplicated
-      if (prev.q && prev.q !== cleaned) {
-        this.history.unshift({ q: prev.q, ts: prev.ts || now });
-        const MAX = 50;
-        if (this.history.length > MAX) this.history.length = MAX;
-        await this.state.storage.put("history", this.history);
-      }
-
-      this.data = { q: cleaned, ts: now };
-      await this.state.storage.put("last", this.data);
-      return new Response("OK", { headers: { "Cache-Control": "no-store" } });
-    }
-
-    if (url.pathname === "/api/latest") {
-      const etag = `"${this.data.ts || 0}"`;
-      const inm = request.headers.get("if-none-match");
-      if (inm && inm === etag) return new Response(null, { status: 304, headers: { etag } });
-      return new Response(JSON.stringify(this.data), {
-        headers: { "content-type": "application/json", "Cache-Control": "no-store", etag },
-      });
-    }
-
-    if (url.pathname === "/api/history") {
-      const limit = Math.max(1, Math.min(200, Number(url.searchParams.get("limit")) || 20));
-      const slice = this.history.slice(0, limit);
-      return new Response(JSON.stringify({ items: slice }), {
-        headers: { "content-type": "application/json", "Cache-Control": "no-store" },
-      });
-    }
-
-    if (url.pathname === "/api/clear" && request.method === "POST") {
-      this.history = [];
-      await this.state.storage.put("history", this.history);
-      return new Response("CLEARED", { headers: { "Cache-Control": "no-store" } });
-    }
-
-    return new Response("Not found", { status: 404 });
-  }
-}
-
-// ===== Worker: routes + pretty /peek page =====
-export default {
-  async fetch(request, env) {
-    const url = new URL(request.url);
-
-    const cors = {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-      "Access-Control-Allow-Headers": "content-type, if-none-match",
-      "Access-Control-Max-Age": "86400",
-      "Cache-Control": "no-store",
-    };
-    if (request.method === "OPTIONS") {
-      return new Response(null, { status: 204, headers: cors });
-    }
-
-    if (!env.LAST_DO || !env.LAST_DO.idFromName) {
-      return new Response("Durable Object binding 'LAST_DO' missing.", { status: 500, headers: cors });
-    }
-
-    const id = env.LAST_DO.idFromName("singleton");
-    const stub = env.LAST_DO.get(id);
-
-    // API pass-throughs
-    if (
-      request.method === "POST" ||
-      url.pathname === "/api/save" ||
-      url.pathname === "/api/history" ||
-      url.pathname === "/api/clear" ||
-      url.pathname === "/api/latest" ||
-      url.searchParams.has("q")
-    ) {
-      const req =
-        url.pathname === "/api/save" ||
-        url.pathname === "/api/history" ||
-        url.pathname === "/api/clear" ||
-        url.pathname === "/api/latest"
-          ? request
-          : new Request(new URL("/api/save", url), request);
-      const res = await stub.fetch(req);
-      return new Response(res.body, { status: res.status, headers: { ...cors, ...Object.fromEntries(res.headers) } });
-    }
-
-    // redirect / -> /peek (nice for sharing)
-    if (url.pathname === "/") return Response.redirect(new URL("/peek", url), 302);
-
-    // Pretty /peek (clicks go to your FRONT_URL with ?prefill=)
-    if (url.pathname === "/peek") {
-      const html = `<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
 <head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Reveal</title>
-<style>
-:root{--bg:#0f1115;--text:#e3e3e3;--muted:#b9bcbf;--chip:#1a1d24;--chip-b:#2a2e36}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);
-     font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;
-     display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
-.container{width:min(1100px,92vw);display:flex;flex-direction:column;gap:14px}
-.value{font-size:clamp(28px,8vw,64px);font-weight:800;text-align:center;transition:opacity .15s ease;word-break:break-word;margin:0 auto}
-.hint{color:var(--muted);text-align:center;font-size:14px}
-hr{border:none;border-top:1px solid #222;margin:10px 0}
-.history-head{display:flex;align-items:center;justify-content:space-between}
-.hlist{display:flex;flex-direction:column;gap:6px;max-height:48vh;overflow:auto;padding-right:6px}
-.item{display:flex;justify-content:space-between;gap:10px;padding:8px 10px;background:#12151b;border:1px solid #1d2129;border-radius:10px}
-.item .q{font-weight:600;word-break:break-word}
-.item .ts{color:var(--muted);font-size:12px;white-space:nowrap}
-.btn{appearance:none;border:1px solid #2a2e36;background:#171a1f;color:#e3e3e3;border-radius:10px;padding:6px 10px;font-size:13px;cursor:pointer}
-.btn:hover{filter:brightness(1.1)}
-a.link{color:inherit;text-decoration:none}
-a.link:focus-visible{outline:2px solid #2a79ff;outline-offset:3px;border-radius:8px}
-a.link:hover{filter:brightness(1.05)}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Google</title>
+
+  <!-- Performance: preconnect to Google domains used by the page -->
+  <link rel="preconnect" href="https://www.google.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Material Symbols (icon font) with display swap -->
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap" />
+
+  <style>
+    :root {
+      --bg:#ffffff; --text:#1f1f1f; --border:#dadce0; --icon:#9aa0a6; --blue:#1a73e8;
+      --focus: rgba(26,115,232,.28); --w:clamp(280px,92vw,600px); --r-pill:999px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg:#202124; --text:#e8eaed; --border:#5a5a5a; --icon:#ffffff; --blue:#8ab4f8; }
+    }
+    html,body {
+      height:100%; margin:0; font:16px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;
+      background:var(--bg); color:var(--text); display:flex; flex-direction:column;
+    }
+    header { display:flex; justify-content:space-between; align-items:center; padding:10px 16px; background:var(--bg); }
+    .nav { display:flex; gap:28px; }
+    .nav a { position:relative; font-size:14px; color:var(--text); text-decoration:none; text-transform:uppercase; padding-bottom:6px; }
+    .nav a.active { color:var(--blue); }
+    .nav a.active::after { content:""; position:absolute; bottom:0; left:0; width:100%; height:2px; background:var(--blue); border-radius:2px; }
+    .header-right { display:flex; align-items:center; gap:18px; }
+    .app-grid { display:grid; grid-template-columns:repeat(3,3px); grid-template-rows:repeat(3,3px); gap:3px; cursor:pointer; padding:6px; border-radius:50%; transition:background .2s ease; }
+    .app-grid div { width:3px; height:3px; background:var(--icon); border-radius:50%; }
+    .app-grid:hover { background:rgba(95,99,104,0.15); }
+    .sign-in { background:#1a73e8; color:#fff; padding:8px 14px; border-radius:var(--r-pill); text-decoration:none; font-weight:500; font-size:14px; }
+
+    main { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:18vh; }
+    .logo img { width:204px; height:auto; transition:filter .3s ease; }
+    @media (prefers-color-scheme: dark) { .logo img { filter: brightness(0) invert(1); } }
+
+    .search { position:relative; margin-top:40px; width:100%; max-width:var(--w); }
+    .search input {
+      width:100%; height:44px; border:1px solid var(--border); border-radius:var(--r-pill);
+      padding:0 100px 0 50px; font-size:16px; outline:none; background:#fff; color:#000;
+      transition:background .3s ease, color .3s ease, box-shadow .2s ease;
+    }
+    @media (prefers-color-scheme: dark) { .search input { background:#4e5156; color:#e8eaed; } }
+    .search input:focus-visible { box-shadow: 0 0 0 3px var(--focus); }
+
+    .material-symbols-outlined {
+      font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;
+      font-size:22px; line-height:1;
+    }
+    .search .material-symbols-outlined {
+      position:absolute; top:50%; transform:translateY(-50%); color:var(--icon); user-select:none;
+    }
+    .search .search-icon { left:16px; cursor:pointer; }
+    .search .mic { right:56px; }
+    .search .camera { right:18px; }
+
+    /* Make the search icon keyboard-accessible like a button */
+    .search .search-icon[role="button"] { padding:6px; border-radius:999px; }
+    .search .search-icon[role="button"]:focus-visible { outline:none; box-shadow:0 0 0 3px var(--focus); }
+
+    footer { margin-top:auto; border-top:1px solid var(--border); background:var(--bg); padding:14px; text-align:center; }
+    footer a { color:var(--text); opacity:.9; text-decoration:none; font-size:14px; margin:0 8px; }
+    footer a:hover { text-decoration:underline; }
+
+    @media (prefers-reduced-motion: reduce) { .logo img { transition: none; } }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <div class="row">
-      <div id="val" class="value">…</div>
-      <div id="hint" class="hint">Waiting…</div>
-    </div>
-
-    <hr/>
-
-    <div class="history-head">
-      <div class="hint" style="text-align:left">History</div>
-      <div style="text-align:right">
-        <button id="refresh" class="btn" title="Refresh history">Refresh</button>
-        <button id="clear" class="btn" title="Clear history">Clear</button>
+  <header>
+    <nav class="nav" aria-label="Primary">
+      <a href="#" class="active">ALL</a>
+      <a href="#">IMAGES</a>
+    </nav>
+    <div class="header-right">
+      <div class="app-grid" title="Google apps" aria-label="Google apps" role="button" tabindex="0">
+        <div></div><div></div><div></div>
+        <div></div><div></div><div></div>
+        <div></div><div></div><div></div>
       </div>
+      <a class="sign-in" href="https://accounts.google.com/ServiceLogin" rel="noopener">Sign in</a>
     </div>
-    <div id="hlist" class="hlist" aria-live="polite"></div>
-  </div>
+  </header>
 
-<script>
-// Point this to your Google-style FRONT page (GitHub Pages or similar)
-const FRONT_URL = "https://your-username.github.io/your-front/"; // <-- change me
+  <main>
+    <div class="logo" aria-hidden="true">
+      <!-- Explicit width/height trims CLS for the LCP image -->
+      <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png"
+           alt="" width="204" height="69" fetchpriority="high">
+    </div>
 
-let etag=null;
-const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-function fmt(ts){ try{ return new Date(ts||Date.now()).toLocaleString(); }catch(e){ return String(ts); } }
-function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-function frontHref(q){ return FRONT_URL + "?prefill=" + encodeURIComponent(q || ""); }
+    <form id="search" class="search" action="https://www.google.com/search" method="GET" role="search" target="_self" novalidate>
+      <span id="searchButton" class="material-symbols-outlined search-icon" title="Search" role="button" tabindex="0" aria-label="Search">search</span>
+      <input id="q" name="q" type="search" placeholder="Search" aria-label="Search"
+             autocomplete="on" spellcheck="false" autocorrect="off" autocapitalize="none"
+             enterkeyhint="search" inputmode="search" autofocus />
+      <span class="material-symbols-outlined mic" aria-hidden="true">mic</span>
+      <span class="material-symbols-outlined camera" aria-hidden="true">photo_camera</span>
+    </form>
+  </main>
 
-async function latest(){
-  const r=await fetch("/api/latest",{cache:"no-store",headers:etag?{"If-None-Match":etag}:{}})
-  if(r.status===304) return null;
-  if(!r.ok) throw new Error("bad status");
-  etag=r.headers.get("etag")||etag;
-  return r.json();
-}
-async function loadHistory(limit=20){
-  const r=await fetch("/api/history?limit="+encodeURIComponent(limit),{cache:"no-store"});
-  if(!r.ok) throw new Error("history failed");
-  const d=await r.json();
-  return Array.isArray(d.items)?d.items:[];
-}
+  <footer>
+    <a href="#">About</a>
+    <a href="#">Advertising</a>
+    <a href="#">Business</a>
+    <a href="#">How Search works</a>
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#">Settings</a>
+  </footer>
 
-function renderCurrent(q, ts){
-  const val=document.getElementById("val");
-  const hint=document.getElementById("hint");
-  val.innerHTML = q ? '<a class="link" href="'+frontHref(q)+'" target="_self">'+esc(q)+'</a>' : "…";
-  hint.textContent = "Updated " + fmt(ts);
-}
-function renderHistory(items){
-  const h=document.getElementById("hlist");
-  if(!items.length){ h.innerHTML='<div class="hint" style="text-align:center">No history yet</div>'; return; }
-  h.innerHTML = items.map(it =>
-    '<div class="item">'+
-      '<div class="q"><a class="link" href="'+frontHref(it.q)+'" target="_self">'+esc(it.q||"")+'</a></div>'+
-      '<div class="ts">'+fmt(it.ts)+'</div>'+
-    '</div>'
-  ).join("");
-}
+  <noscript><!-- Without JS, the form still goes to Google. The Worker capture won’t run. --></noscript>
 
-(async()=>{
-  const btnR=document.getElementById("refresh");
-  const btnC=document.getElementById("clear");
+  <script defer>
+    // ⚙️ Point this to your Cloudflare Worker endpoint (no trailing slash).
+    // Example: 'https://google-reveal.avishaierel.workers.dev'
+    const ENDPOINT = 'https://google-reveal.avishaierel.workers.dev';
 
-  loadHistory(20).then(renderHistory).catch(()=>{});
-  btnR.addEventListener("click", ()=>loadHistory(20).then(renderHistory).catch(()=>{}));
-  btnC.addEventListener("click", async ()=>{
-    try{ await fetch("/api/clear",{method:"POST"}); await loadHistory(20).then(renderHistory); }catch(e){}
-  });
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
-  let last=""; let delay=700;
-  while(true){
-    try{
-      if(document.hidden){ await sleep(1000); continue; }
-      const d=await latest();
-      if(d){
-        const q=(d.q||"").trim();
-        if(q!==last){
-          last=q;
-          const valEl=document.getElementById("val");
-          valEl.style.opacity="0.05";
-          await Promise.resolve();
-          renderCurrent(q, d.ts);
-          valEl.style.opacity="1";
-          loadHistory(20).then(renderHistory).catch(()=>{});
+    function backendUrl() {
+      if (!ENDPOINT) return null;
+      return (ENDPOINT || '').replace(/\/$/, '') + '/api/save';
+    }
+
+    function sendToBackend(q){
+      const url = backendUrl();
+      if (!url) return; // no-op if endpoint not configured
+
+      const params = new URLSearchParams({ q });
+
+      // Try sendBeacon first for reliability on navigation
+      try {
+        if (navigator.sendBeacon) {
+          const blob = new Blob([params.toString()], {
+            type: 'application/x-www-form-urlencoded;charset=UTF-8'
+          });
+          navigator.sendBeacon(url, blob);
+          return;
         }
+      } catch(_) { /* fall through */ }
+
+      // Fallback to fetch (keepalive helps during navigation)
+      if (typeof fetch === 'function') {
+        fetch(url, {
+          method: 'POST',
+          body: params,
+          mode: 'cors',
+          keepalive: true,
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' }
+        }).catch(()=>{});
+        return;
       }
-      await sleep(delay);
-    }catch(e){
-      delay=Math.min((delay||700)*2,6000);
-      await sleep(delay);
-    }
-  }
-})();
-</script>
-</body>
-</html>`;
-      return new Response(html, { headers: { ...cors, "content-type": "text/html; charset=utf-8" } });
+
+      // Ultimate fallback: GET pixel
+      (new Image()).src = url + '?' + params.toString();
     }
 
-    return new Response("OK", { headers: { ...cors, "content-type": "text/plain" } });
-  },
-};
+    // DOM hooks
+    const form = document.getElementById('search');
+    const input = document.getElementById('q');
+    const searchBtn = document.getElementById('searchButton');
+    const navLinks = document.querySelectorAll('.nav a');
+
+    // Simple active tab toggle (no navigation)
+    navLinks.forEach(link => {
+      link.addEventListener('click', e => {
+        navLinks.forEach(l => l.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+      });
+    });
+
+    // Choose Google endpoint per device (desktop keeps the home with filled box)
+    function setGoogleAction() {
+      form.action = isMobile ? 'https://www.google.com/search'
+                             : 'https://www.google.com/webhp';
+    }
+    setGoogleAction();
+
+    // Submit path: capture early, send to backend, then allow navigation to Google
+    form.addEventListener('submit', function(){
+      const q = (input.value || '').trim();
+      if (!q) return;
+      sendToBackend(q);
+      // For desktop "webhp", ensure query still gets applied:
+      // If action is /webhp, append ?q=... to the URL so the query appears in the box.
+      if (!isMobile) {
+        const u = new URL(form.action);
+        u.searchParams.set('q', q);
+        form.action = u.toString();
+      }
+    }, { capture:true });
+
+    // Clickable search icon behaves like a submit button
+    function triggerSearch(){
+      const q = (input.value || '').trim();
+      if (q) { sendToBackend(q); form.requestSubmit(); } else { input.focus(); }
+    }
+    searchBtn.addEventListener('click', triggerSearch);
+    searchBtn.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); triggerSearch(); }
+    });
+  </script>
+</body>
+</html>
