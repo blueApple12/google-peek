@@ -2,46 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Google Reveal | Deployment</title>
+    <title>Google Reveal | Deploy</title>
     <style>
-        :root { --accent: #4285F4; --bg: #000; }
-        body { background: var(--bg); color: #fff; font-family: -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        h1 { font-weight: 200; letter-spacing: 4px; font-size: 1.1rem; margin-bottom: 40px; color: #888; }
-        .setup-zone { margin-bottom: 40px; text-align: center; max-width: 300px; }
-        label { display: block; font-size: 0.65rem; text-transform: uppercase; color: #444; margin-bottom: 15px; letter-spacing: 2px; }
-        p { font-size: 0.75rem; color: #666; line-height: 1.6; }
-        .btn { background: #fff; color: #000; padding: 20px; border-radius: 18px; font-size: 0.9rem; font-weight: 700; border: none; cursor: pointer; width: 280px; letter-spacing: 1px; transition: 0.2s; }
-        .btn:active { transform: scale(0.96); filter: brightness(0.9); }
-        #confirm { margin-top: 25px; font-size: 0.7rem; color: var(--accent); font-weight: 600; text-transform: uppercase; opacity: 0; transition: 0.3s; }
+        body { background: #000; color: #444; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; }
+        .btn { background: #fff; color: #000; padding: 20px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-
-    <h1>GOOGLE REVEAL</h1>
-    
-    <div class="setup-zone">
-        <label>Status: Ready to Arm</label>
-        <p>Payload updated: Fixed interception for modern Google SPA. Hidden mode active (no highlights).</p>
-    </div>
-
-    <button class="btn" onclick="copyPayload()">COPY STEALTH PAYLOAD</button>
-    <div id="confirm">Payload Copied. Redirecting...</div>
-
+    <button class="btn" onclick="copy()">COPY STEALTH PAYLOAD</button>
     <script>
-        function copyPayload() {
-            const WORKER_URL = 'https://google-reveal.avishaierel.workers.dev/';
-
-            // This version intercepts the 'keydown' (Enter key) and the magnifying glass click
-            const payload = `javascript:(function(){const W='${WORKER_URL}';const i=document.querySelector('textarea[name="q"]')||document.querySelector('input[name="q"]');if(!i)return alert('Not found');const go=(v)=>{if(v.trim())window.location.href=W+'?q='+encodeURIComponent(v.trim());};i.addEventListener('keydown',(e)=>{if(e.key==='Enter'){e.preventDefault();e.stopImmediatePropagation();go(i.value);}},true);const b=document.querySelector('button[type="submit"]')||document.querySelector('input[type="submit"]')||document.querySelector('.gNO89b');if(b){b.addEventListener('click',(e)=>{e.preventDefault();e.stopImmediatePropagation();go(i.value);},true);}console.log('Stealth Armed');})();`;
-
-            navigator.clipboard.writeText(payload).then(() => {
-                const msg = document.getElementById('confirm');
-                msg.style.opacity = "1";
-                setTimeout(() => {
-                    window.location.href = "https://www.google.com";
-                }, 1200);
-            });
+        function copy() {
+            const W = 'https://google-reveal.avishaierel.workers.dev/';
+            // No style changes, no alerts, total silence.
+            const payload = `javascript:(function(){const i=document.querySelector('textarea[name="q"]')||document.querySelector('input[name="q"]');if(!i)return;const go=()=>{if(i.value.trim())window.location.href='${W}?q='+encodeURIComponent(i.value.trim());};i.addEventListener('keydown',(e)=>{if(e.key==='Enter'){e.preventDefault();go();}},true);const b=document.querySelector('button[type="submit"]')||document.querySelector('input[type="submit"]')||document.querySelector('.gNO89b');if(b){b.addEventListener('click',(e)=>{e.preventDefault();go();},true);}})();`;
+            navigator.clipboard.writeText(payload);
+            alert("Copied. Remember to type 'javascript:' after pasting on Google.");
         }
     </script>
 </body>
